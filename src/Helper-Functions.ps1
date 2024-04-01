@@ -49,7 +49,8 @@ class ResponseObject {
                 $ResponseBuffer = [System.IO.File]::ReadAllBytes($this.FilePath)
             }
             "img" {
-                $this.ContentType = "image/jpeg"
+                # $this.ContentType = "image/jpeg"
+                $this.ContentType = "application/octet-stream"
                 $ResponseBuffer = [System.IO.File]::ReadAllBytes($this.FilePath)
             }
             Default {}
@@ -98,22 +99,17 @@ function RouteRequest($requestObject) {
         }
         default {
             # Call the function dynamically based on the controller name
-            # The function name should be in the format "Show-{Controller}"
-            # $fullPath = Resolve-Path (Join-Path $PSScriptRoot $requestObject.LocalPath)
-            $relPath = Join-Path $PSScriptRoot $requestObject.LocalPath
-            # $fullPath = Resolve-Path (Join-Path $PSScriptRoot $requestObject.LocalPath)
-            Write-Output "relpath: $($relPath)"
+            # if physical file exists, show it
+            $fullPath = Join-Path $PSScriptRoot $requestObject.LocalPath
             Write-Output "fullpath: $($fullPath)"
 
-            if (Test-Path $($relPath)) {
+            if (Test-Path $($fullPath)) {
                 write-host yes
+                Show-FileFromPath $requestObject
                 break            
-            } else {
-                write-host no
-                break   
             }
 
-
+            # The function name should be in the format "Show-{Controller}"
             # $functionName = "Show-" + $requestObject.Controller
             # if (Get-Command $functionName -ErrorAction SilentlyContinue) {
             #     & $functionName
@@ -131,5 +127,15 @@ function Show-HomeController($requestObject) {
     $response = [ResponseObject]::new($requestObject.HttpContext.Response)
     $response.ResponseType = "html"
     $response.FilePath = Resolve-Path "./index.html"
+    $response.Respond()
+}
+
+function Show-FileFromPath($requestObject) {
+    $fullPath = Join-Path $PSScriptRoot $requestObject.LocalPath
+    Write-Output "fullpath: $($fullPath)"
+
+    $response = [ResponseObject]::new($requestObject.HttpContext.Response)
+    $response.ResponseType = "img"
+    $response.FilePath = Resolve-Path $fullPath
     $response.Respond()
 }
