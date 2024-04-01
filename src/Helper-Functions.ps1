@@ -83,21 +83,6 @@ function Get-JsonFromBody {
     }
 }
 
-# function Set-JsonResponse($context) {
-#         $HttpResponse = $context.Response
-# 		$HttpResponse.Headers.Add("Content-Type", "application/json")
-# 		$HttpResponse.Headers.Add("Access-Control-Allow-Origin", "http://172.17.17.195:8080")
-# 		$HttpResponse.Headers.Add("Access-Control-Allow-Headers", "Content-Type")
-# 		$HttpResponse.StatusCode = 200
-# 		$jsondata = @{Controller = $context.Controller; ExitCode = $Result; Output = $JsonResult } 
-# 		$object = new-object psobject -Property $jsondata 
-# 		$jsondata = $object | ConvertTo-Json -depth 100
-# 		$ResponseBuffer = [System.Text.Encoding]::UTF8.GetBytes($jsondata)
-# 		$HttpResponse.ContentLength64 = $ResponseBuffer.Length
-# 		$HttpResponse.OutputStream.Write($ResponseBuffer, 0, $ResponseBuffer.Length)
-# 		$HttpResponse.Close()
-# }
-
 function RouteRequest($requestObject) {
     switch ($requestObject.Controller.ToLower()) {
         "shutdown" {
