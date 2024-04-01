@@ -27,16 +27,7 @@ try {
 		Write-Output "paths: $($requestObject.Paths)"
 		Write-Output "controller: $($requestObject.Controller)"
     
-	
-		if ($requestObject.Controller -eq "shutdown") {
-			Write-Host "`nListener shutting down..."
-			$HttpListener.Stop()
-			break;
-		}
-
-		if ($requestObject.Controller -eq "" -or $requestObject.Controller.ToLower() -eq "index") {
-			Show-HomeController
-		}
+		RouteRequest $requestObject $HttpListener
 	
 		$HttpResponse = $context.Response
 		$HttpResponse.Headers.Add("Content-Type", "application/json")
@@ -50,7 +41,6 @@ try {
 		$HttpResponse.ContentLength64 = $ResponseBuffer.Length
 		$HttpResponse.OutputStream.Write($ResponseBuffer, 0, $ResponseBuffer.Length)
 		$HttpResponse.Close()
-		$Plot = ""
 		Write-Output "end..." # Newline
 	}
 }

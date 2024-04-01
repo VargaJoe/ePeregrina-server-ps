@@ -44,7 +44,63 @@ function Get-JsonFromBody {
     }
 }
 
-function Show-HomeController {
+# function Set-JsonResponse($context) {
+#         $HttpResponse = $context.Response
+# 		$HttpResponse.Headers.Add("Content-Type", "application/json")
+# 		$HttpResponse.Headers.Add("Access-Control-Allow-Origin", "http://172.17.17.195:8080")
+# 		$HttpResponse.Headers.Add("Access-Control-Allow-Headers", "Content-Type")
+# 		$HttpResponse.StatusCode = 200
+# 		$jsondata = @{Controller = $context.Controller; ExitCode = $Result; Output = $JsonResult } 
+# 		$object = new-object psobject -Property $jsondata 
+# 		$jsondata = $object | ConvertTo-Json -depth 100
+# 		$ResponseBuffer = [System.Text.Encoding]::UTF8.GetBytes($jsondata)
+# 		$HttpResponse.ContentLength64 = $ResponseBuffer.Length
+# 		$HttpResponse.OutputStream.Write($ResponseBuffer, 0, $ResponseBuffer.Length)
+# 		$HttpResponse.Close()
+# }
+
+function RouteRequest($requestObject, $HttpListener) {
+    switch ($requestObject.Controller.ToLower()) {
+        "shutdown" {
+            Write-Host "`nListener shutting down..."
+            $HttpListener.Stop()
+            exit
+        }
+        "" {
+            Show-HomeController
+        }
+        "index" {
+            Show-HomeController
+        }
+        default {
+            # Call the function dynamically based on the controller name
+            # The function name should be in the format "Show-{Controller}"
+            # $fullPath = Resolve-Path (Join-Path $PSScriptRoot $requestObject.LocalPath)
+            $relPath = Join-Path $PSScriptRoot $requestObject.LocalPath
+            # $fullPath = Resolve-Path (Join-Path $PSScriptRoot $requestObject.LocalPath)
+            Write-Output "relpath: $($relPath)"
+            Write-Output "fullpath: $($fullPath)"
+
+            if (Test-Path $($relPath)) {
+                write-host yes
+                break            
+            } else {
+                write-host no
+                break   
+            }
+
+
+            # $functionName = "Show-" + $requestObject.Controller
+            # if (Get-Command $functionName -ErrorAction SilentlyContinue) {
+            #     & $functionName
+            # } else {
+            #     Write-Host "No function found for controller: $requestObject.Controller"
+            # }
+        }
+    }
+}
+
+function Show-HomeController($context) {
     Write-Output "$($Global:Settings.ComicsFolderPaths)"
     Write-Output "$($Global:Settings.BooksFolderPaths)"
 }
