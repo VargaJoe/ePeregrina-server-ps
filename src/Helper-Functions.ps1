@@ -21,6 +21,19 @@ class RequestObject {
     }
 }
 
+
+class SettingsObject {
+    [string[]]$ComicsFolderPaths
+    [string[]]$BooksFolderPaths
+
+    SettingsObject() {
+        $settingsFilePath = "./settings.json"
+        $settings = Get-Content $settingsFilePath | ConvertFrom-Json
+        $this.ComicsFolderPaths = $settings.ComicsFolderPaths
+        $this.BooksFolderPaths = $settings.BooksFolderPaths
+    }
+}
+
 function Get-JsonFromBody {
     param($HttpRequest)
 
@@ -29,4 +42,9 @@ function Get-JsonFromBody {
         $json = $Reader.ReadToEnd() | ConvertFrom-Json 
         return $json
     }
+}
+
+function Show-HomeController {
+    Write-Output "$($Global:Settings.ComicsFolderPaths)"
+    Write-Output "$($Global:Settings.BooksFolderPaths)"
 }

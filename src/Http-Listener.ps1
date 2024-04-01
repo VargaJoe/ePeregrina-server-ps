@@ -1,9 +1,10 @@
 # Use the following commands to bind/unbind SSL cert
 # netsh http add sslcert ipport=0.0.0.0:443 certhash=3badca4f8d38a85269085aba598f0a8a51f057ae "appid={00112233-4455-6677-8899-AABBCCDDEEFF}"
 # netsh http delete sslcert ipport=0.0.0.0:443 
-$Global:JsonResult = $null
-
 . ./Helper-Functions.ps1
+
+$Global:JsonResult = $null
+$Global:Settings = [SettingsObject]::new()
 
 $HttpListener = New-Object System.Net.HttpListener
 $HttpListener.Prefixes.Add("http://+:8888/")
@@ -32,12 +33,10 @@ try {
 			$HttpListener.Stop()
 			break;
 		}
-	
-		# if (-Not [string]::IsNullOrEmpty(($requestObject.Controller))) {
-		# 	Write-Host plot: ($requestObject.Controller)
-		# 	& ../Run.ps1 -plot $Plot
-		# 	$Result = $LASTEXITCODE
-		# }
+
+		if ($requestObject.Controller -eq "" -or $requestObject.Controller.ToLower() -eq "index") {
+			Show-HomeController
+		}
 	
 		$HttpResponse = $context.Response
 		$HttpResponse.Headers.Add("Content-Type", "application/json")
