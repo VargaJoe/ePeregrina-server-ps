@@ -27,7 +27,7 @@ try {
 		Write-Output "controller: $($requestObject.Controller)"
     
 	
-		if ($controller -eq "shutdown") {
+		if ($requestObject.Controller -eq "shutdown") {
 			Write-Host "`nListener shutting down..."
 			$HttpListener.Stop()
 			break;
