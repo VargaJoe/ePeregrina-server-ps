@@ -1,8 +1,21 @@
 {
-  "ComicsFolderPaths": [
-    "./comics"
+  "WebFolder": "./",
+  "filesPaths" : [ ],
+  "comicsPaths": [
+    {
+      "pathString" : "./comics",
+      "userName" : [ "username" ]
+    }
   ],
-  "BooksFolderPaths": [
-    "./books"
-  ]
+  "booksPaths": [
+    {
+      "pathString" : "./books",
+      "userName" : [ "username" ]
+    }    
+  ],
+  "users" : [ {
+    "name" : "username",
+    "passwordHash" : "5346346436436436"
+  } ],
+  "theme" : "custom-theme"
 }

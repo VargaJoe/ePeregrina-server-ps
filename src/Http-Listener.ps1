@@ -4,7 +4,6 @@
 . ./Helper-Functions.ps1
 
 $Global:JsonResult = $null
-$Global:Settings = [SettingsObject]::new()
 
 $HttpListener = New-Object System.Net.HttpListener
 $HttpListener.Prefixes.Add("http://+:8888/")

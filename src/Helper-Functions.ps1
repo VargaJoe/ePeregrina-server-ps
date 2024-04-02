@@ -9,6 +9,7 @@ class RequestObject {
     [string]$Body
     [System.Collections.Specialized.NameValueCollection]$UrlVariables
     [string]$Controller
+    [PSCustomObject]$Settings
 
     RequestObject([System.Net.HttpListener] $listener) {
         $this.HttpListener = $listener
@@ -20,6 +21,9 @@ class RequestObject {
         $this.Body = Get-JsonFromBody($this.HttpRequest)
         $this.UrlVariables = $this.HttpRequest.QueryString
         $this.Controller = $this.Paths[1]
+
+        $settingsFilePath = "./settings.json"
+        $this.Settings = Get-Content $settingsFilePath | ConvertFrom-Json
     }
 }
 
@@ -61,19 +65,6 @@ class ResponseObject {
         $this.HttpResponse.Close()
     }
 }
-
-class SettingsObject {
-    [string[]]$ComicsFolderPaths
-    [string[]]$BooksFolderPaths
-
-    SettingsObject() {
-        $settingsFilePath = "./settings.json"
-        $settings = Get-Content $settingsFilePath | ConvertFrom-Json
-        $this.ComicsFolderPaths = $settings.ComicsFolderPaths
-        $this.BooksFolderPaths = $settings.BooksFolderPaths
-    }
-}
-
 function Get-JsonFromBody {
     param($HttpRequest)
 
@@ -98,31 +89,31 @@ function RouteRequest($requestObject) {
             Show-HomeController $requestObject
         }
         default {
+            # The function name should be in the format "Show-{Controller}"
+            $functionName = "Show-" + $requestObject.Controller + "Controller"
+            if (Get-Command $functionName -ErrorAction SilentlyContinue) {
+                & $functionName $requestObject
+            }
+
             # Call the function dynamically based on the controller name
             # if physical file exists, show it
-            $fullPath = Join-Path $PSScriptRoot $requestObject.LocalPath
+            $fullPath = Join-Path $PSScriptRoot "/themes/" $requestObject.Settings.Theme $requestObject.LocalPath
             Write-Output "fullpath: $($fullPath)"
 
             if (Test-Path $($fullPath)) {
                 write-host yes
                 Show-FileFromPath $requestObject
                 break            
-            }
-
-            # The function name should be in the format "Show-{Controller}"
-            # $functionName = "Show-" + $requestObject.Controller
-            # if (Get-Command $functionName -ErrorAction SilentlyContinue) {
-            #     & $functionName
-            # } else {
-            #     Write-Host "No function found for controller: $requestObject.Controller"
-            # }
+            }          
         }
     }
 }
 
 function Show-HomeController($requestObject) {
-    Write-Output "$($Global:Settings.ComicsFolderPaths)"
-    Write-Output "$($Global:Settings.BooksFolderPaths)"
+    Write-Output "1 $($requestObject.Settings.theme)"
+    Write-Output "3 $($requestObject.Settings.WebFolder)"
+    Write-Output "4 $($requestObject.Settings.comicsPaths[0].pathString)"
+    Write-Output "5 $($requestObject.Settings.booksPaths[0].pathString)"
 
     $response = [ResponseObject]::new($requestObject.HttpContext.Response)
     $response.ResponseType = "html"
@@ -131,7 +122,7 @@ function Show-HomeController($requestObject) {
 }
 
 function Show-FileFromPath($requestObject) {
-    $fullPath = Join-Path $PSScriptRoot $requestObject.LocalPath
+    $fullPath = Join-Path $PSScriptRoot $requestObject.Settings.Theme $requestObject.LocalPath
     Write-Output "fullpath: $($fullPath)"
 
     $response = [ResponseObject]::new($requestObject.HttpContext.Response)
