@@ -52,7 +52,7 @@ class ResponseObject {
                 $this.ContentType = "text/html"
                 $ResponseBuffer = [System.IO.File]::ReadAllBytes($this.FilePath)
             }
-            "img" {
+            "binary" {
                 # $this.ContentType = "image/jpeg"
                 $this.ContentType = "application/octet-stream"
                 $ResponseBuffer = [System.IO.File]::ReadAllBytes($this.FilePath)
@@ -65,6 +65,12 @@ class ResponseObject {
         $this.HttpResponse.Close()
     }
 }
+
+function Get-FilePath {
+    param($requestObject)
+    $fullPath = Join-Path $Global:RootPath "/themes/" $requestObject.Settings.Theme $requestObject.LocalPath
+    return $fullPath
+}
 function Get-JsonFromBody {
     param($HttpRequest)
 
@@ -75,12 +81,37 @@ function Get-JsonFromBody {
     }
 }
 
+function RedirectRequest($requestObject, $newUrl) {
+    $response = $requestObject.HttpContext.Response
+    $response.StatusCode = 302
+    $response.RedirectLocation = $newUrl
+    $response.Close()
+}
+
 function RouteRequest($requestObject) {
     switch ($requestObject.Controller.ToLower()) {
         "shutdown" {
             Write-Host "`nListener shutting down..."
             $requestObject.HttpListener.Stop()
             exit
+        }
+        "restart" {
+            Write-Host "`nListener shutting down..."
+            $requestObject.HttpListener.Stop()
+            
+            Write-Host "`nListener starting..."
+            $requestObject.HttpListener.Start()
+            
+            Write-Host "`nRedirect to root to prevent infinite loop..."
+            $requestObject = [RequestObject]::new($HttpListener)
+            RedirectRequest $requestObject "/"
+        }
+        "reload" {
+            Write-Host "`nListener shutting down..."
+            $requestObject.HttpListener.Stop()
+            
+            Write-Host "`nReloading script, so the listener will restart..."
+            . ./Http-Listener.ps1
         }
         "" {
             Show-HomeController $requestObject
@@ -97,36 +128,15 @@ function RouteRequest($requestObject) {
 
             # Call the function dynamically based on the controller name
             # if physical file exists, show it
-            $fullPath = Join-Path $PSScriptRoot "/themes/" $requestObject.Settings.Theme $requestObject.LocalPath
+            $fullPath = Get-FilePath $requestObject
             Write-Output "fullpath: $($fullPath)"
 
             if (Test-Path $($fullPath)) {
                 write-host yes
-                Show-FileFromPath $requestObject
+                BinaryHandler $requestObject
                 break            
             }          
         }
     }
 }
 
-function Show-HomeController($requestObject) {
-    Write-Output "1 $($requestObject.Settings.theme)"
-    Write-Output "3 $($requestObject.Settings.WebFolder)"
-    Write-Output "4 $($requestObject.Settings.comicsPaths[0].pathString)"
-    Write-Output "5 $($requestObject.Settings.booksPaths[0].pathString)"
-
-    $response = [ResponseObject]::new($requestObject.HttpContext.Response)
-    $response.ResponseType = "html"
-    $response.FilePath = Resolve-Path "./index.html"
-    $response.Respond()
-}
-
-function Show-FileFromPath($requestObject) {
-    $fullPath = Join-Path $PSScriptRoot $requestObject.Settings.Theme $requestObject.LocalPath
-    Write-Output "fullpath: $($fullPath)"
-
-    $response = [ResponseObject]::new($requestObject.HttpContext.Response)
-    $response.ResponseType = "img"
-    $response.FilePath = Resolve-Path $fullPath
-    $response.Respond()
-}
