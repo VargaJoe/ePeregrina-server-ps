@@ -20,7 +20,7 @@ $HttpListener.Prefixes.Add("http://+:8888/")
 $HttpListener.Prefixes.Add("https://+:443/")
 $HttpListener.Start()
 $requestObject = [RequestObject]::new($HttpListener)
-RedirectRequest $requestObject "/"
+RedirectRequest $requestObject "/comics"
 
 try {
 	$stopFile = "./appoffline.htm"

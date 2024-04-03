@@ -29,8 +29,8 @@ class RequestObject {
 
 class ResponseObject {
     [System.Net.HttpListenerResponse]$HttpResponse
-    [string]$JsonData
     [string]$FilePath
+    [string]$ResponseString
     [string]$ResponseType
     [string]$ContentType
 
@@ -46,19 +46,24 @@ class ResponseObject {
         switch ($this.ResponseType) {
             "json" {
                 $this.ContentType = "application/json"
-                $ResponseBuffer = [System.Text.Encoding]::UTF8.GetBytes($this.JsonData)
             }
             "html" {
                 $this.ContentType = "text/html"
-                $ResponseBuffer = [System.IO.File]::ReadAllBytes($this.FilePath)
             }
             "binary" {
-                # $this.ContentType = "image/jpeg"
                 $this.ContentType = "application/octet-stream"
-                $ResponseBuffer = [System.IO.File]::ReadAllBytes($this.FilePath)
             }
             Default {}
         }
+
+        if ($this.ResponseString) {
+            $ResponseBuffer = [System.Text.Encoding]::UTF8.GetBytes($this.ResponseString)
+        } elseif ($this.filepath) {
+            $ResponseBuffer = [System.IO.File]::ReadAllBytes($this.FilePath)
+        } else {
+            $this.HttpResponse.StatusCode = 500
+        }
+
         $this.HttpResponse.ContentLength64 = $ResponseBuffer.Length
         $this.HttpResponse.OutputStream.Write($ResponseBuffer, 0, $ResponseBuffer.Length)
         $this.HttpResponse.Headers.Add("Content-Type", $this.ContentType)
