@@ -42,7 +42,7 @@ class ResponseObject {
     }
 
     [void] Respond() {
-        $ResponseBuffer = $null
+        $ResponseBuffer = @()
         switch ($this.ResponseType) {
             "json" {
                 $this.ContentType = "application/json"
@@ -56,24 +56,34 @@ class ResponseObject {
             Default {}
         }
 
-        if ($this.ResponseString) {
-            $ResponseBuffer = [System.Text.Encoding]::UTF8.GetBytes($this.ResponseString)
-        } elseif ($this.filepath) {
-            $ResponseBuffer = [System.IO.File]::ReadAllBytes($this.FilePath)
-        } else {
+        try {
+            if ($this.ResponseString -and $this.ResponseString.Length -gt 0) {
+                $ResponseBuffer = [System.Text.Encoding]::UTF8.GetBytes($this.ResponseString)
+            } elseif ($this.filepath) {
+                $ResponseBuffer = [System.IO.File]::ReadAllBytes($this.FilePath)
+            } else {
+                $this.HttpResponse.StatusCode = 404
+            }
+
+            if ($ResponseBuffer.Length -gt 0) {
+                $this.HttpResponse.ContentLength64 = $ResponseBuffer.Length
+                $this.HttpResponse.OutputStream.Write($ResponseBuffer, 0, $ResponseBuffer.Length)                
+            }
+            $this.HttpResponse.Headers.Add("Content-Type", $this.ContentType)
+        } catch {
             $this.HttpResponse.StatusCode = 500
         }
-
-        $this.HttpResponse.ContentLength64 = $ResponseBuffer.Length
-        $this.HttpResponse.OutputStream.Write($ResponseBuffer, 0, $ResponseBuffer.Length)
-        $this.HttpResponse.Headers.Add("Content-Type", $this.ContentType)
         $this.HttpResponse.Close()
     }
 }
 
 function Get-FilePath {
     param($requestObject)
-    $fullPath = Join-Path $Global:RootPath "/themes/" $requestObject.Settings.Theme $requestObject.LocalPath
+    $fullPath = $(Join-Path $Global:RootPath $requestObject.Settings.webFolder $requestObject.LocalPath)
+    # if (Test-Path $fullPath) {
+    # if (Test-Path $(Join-Path $Global:RootPath $requestObject.Settings.webFolder $requestObject.LocalPath)) {
+    #     $fullPath = Resolve-Path $(Join-Path $Global:RootPath $requestObject.Settings.webFolder $requestObject.LocalPath)
+    # }    
     return $fullPath
 }
 function Get-JsonFromBody {
@@ -136,11 +146,11 @@ function RouteRequest($requestObject) {
             $fullPath = Get-FilePath $requestObject
             Write-Output "fullpath: $($fullPath)"
 
-            if (Test-Path $($fullPath)) {
-                write-host yes
+            # if (Test-Path $($fullPath)) {
+                # write-host yes
                 BinaryHandler $requestObject
                 break            
-            }          
+            # }          
         }
     }
 }
