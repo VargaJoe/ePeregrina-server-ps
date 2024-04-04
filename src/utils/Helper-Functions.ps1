@@ -72,8 +72,11 @@ class ResponseObject {
             $this.HttpResponse.Headers.Add("Content-Type", $this.ContentType)
         } catch {
             $this.HttpResponse.StatusCode = 500
+        } finally {
+            $this.HttpResponse.OutputStream?.Flush()
+            $this.HttpResponse.Close()
+            "close response" | Out-File -Append -FilePath "./log.txt"
         }
-        $this.HttpResponse.Close()
     }
 }
 
@@ -138,20 +141,47 @@ function RouteRequest($requestObject) {
             # The function name should be in the format "Show-{Controller}"
             $functionName = "Show-" + $requestObject.Controller + "Controller"
             if (Get-Command $functionName -ErrorAction SilentlyContinue) {
+                # Call the function dynamically based on the controller name if exists
                 & $functionName $requestObject
-            }
-
-            # Call the function dynamically based on the controller name
-            # if physical file exists, show it
-            $fullPath = Get-FilePath $requestObject
-            Write-Output "fullpath: $($fullPath)"
-
-            # if (Test-Path $($fullPath)) {
-                # write-host yes
+            } else {
+                # If the controller does not exist, treat it as a binary request
                 BinaryHandler $requestObject
-                break            
-            # }          
+            }     
         }
     }
 }
 
+
+function Show-View($requestObject, $viewName) {
+    "new response $viewName" | Out-File -Append -FilePath "./log.txt"
+    $response = [ResponseObject]::new($requestObject.HttpContext.Response)    
+    $response.ResponseType = "html"
+
+    # Read the HTML content from the file
+    $viewTemplate = (Get-Content -Path "./views/$viewName.pshtml" -Raw) #-Replace '"', '&quot;'
+    # $evaluatedView = (Invoke-Expression "`"$viewTemplate`"") -Replace '&quot;', '"'    
+
+    # Define a regular expression pattern to match PowerShell snippets within $( ... )
+    $pattern = '\$\((.*?)\)'
+
+    # Use a regular expression match evaluator to evaluate PowerShell snippets
+    $evaluatedView = [regex]::Replace($viewTemplate, $pattern, {
+        param($match)
+        # Evaluate the PowerShell snippet
+        $result = Invoke-Expression $match.Groups[1].Value
+        # Return the evaluated result
+        return $result
+    })
+
+    # Evaluated HTML content goes to response
+    $response.ResponseString = $evaluatedView
+    $response.Respond()
+    try {
+        $null = $response.HttpResponse.Headers
+        Write-Output "HttpResponse is still open"
+        $response.HttpResponse.Close()
+    } catch [ObjectDisposedException] {
+        Write-Output "HttpResponse has been closed"
+    }
+    "after response $viewName" | Out-File -Append -FilePath "./log.txt"
+}

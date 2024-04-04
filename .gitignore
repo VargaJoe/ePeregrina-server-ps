@@ -4,3 +4,4 @@ src/theme*
 src/comics*
 src/books*
 src/!cleanup*
+src/log*.txt

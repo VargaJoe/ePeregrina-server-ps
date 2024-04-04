@@ -15,30 +15,29 @@ Get-ChildItem -Path ./Controllers -Filter *.ps1 | ForEach-Object {
 $Global:JsonResult = $null
 $Global:RootPath = $PSScriptRoot
 
+"new listener" | Out-File -Append -FilePath "./log.txt"
 $HttpListener = New-Object System.Net.HttpListener
 $HttpListener.Prefixes.Add("http://+:8888/")
 $HttpListener.Prefixes.Add("https://+:443/")
 $HttpListener.Start()
-$requestObject = [RequestObject]::new($HttpListener)
-RedirectRequest $requestObject "/"
 
 try {
 	$stopFile = "./appoffline.htm"
 
 	While ($HttpListener.IsListening -and !(Test-Path -Path $stopFile)) {
-
 		# context variables
+		"new request" | Out-File -Append -FilePath "./log.txt"
 		$requestObject = [RequestObject]::new($HttpListener)
-		Write-Output "localPath: $($requestObject.LocalPath)"
+		# Write-Output "localPath: $($requestObject.LocalPath)"
 		Write-Output "url: $($requestObject.RequestUrl)"
-		Write-Output "paths: $($requestObject.Paths)"
-		Write-Output "controller: $($requestObject.Controller)"
+		# Write-Output "paths: $($requestObject.Paths)"
+		# Write-Output "controller: $($requestObject.Controller)"
     
 		RouteRequest $requestObject
-		Write-Output "end..." # Newline
-		$requestObject = $null
+		"end request" | Out-File -Append -FilePath "./log.txt"
 	}
 }
 finally {
 	$HttpListener.Stop()
+	"stop listener" | Out-File -Append -FilePath "./log.txt"
 }

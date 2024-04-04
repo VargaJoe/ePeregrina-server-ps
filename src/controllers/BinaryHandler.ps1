@@ -1,7 +1,8 @@
 function BinaryHandler($requestObject) {
-    $fullPath = $fullPath = Get-FilePath $requestObject
+    $fullPath = Get-FilePath $requestObject
     Write-Output "fullpath: $($fullPath)"
 
+    "new response $fullpath" | Out-File -Append -FilePath "./log.txt"
     $response = [ResponseObject]::new($requestObject.HttpContext.Response)
     $response.ResponseType = "binary"
     if (Test-Path $fullPath) { 
@@ -15,4 +16,5 @@ function BinaryHandler($requestObject) {
     }
     
     $response.Respond()
+    "after response $fullpath" | Out-File -Append -FilePath "./log.txt"
 }

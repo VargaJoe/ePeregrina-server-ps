@@ -8,8 +8,5 @@ function Show-BooksController($requestObject) {
         Write-Output $item.FullName
     }
 
-    $response = [ResponseObject]::new($requestObject.HttpContext.Response)
-    $response.ResponseType = "html"
-    $response.FilePath = Resolve-Path "./index.html"
-    $response.Respond()
+    Show-View $requestObject "category"
 }
