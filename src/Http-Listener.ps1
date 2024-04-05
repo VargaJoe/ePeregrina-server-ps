@@ -3,12 +3,16 @@
 # netsh http delete sslcert ipport=0.0.0.0:443 
 
 # Load helper functions from the Utils folder
-Get-ChildItem -Path ./Utils -Filter *.ps1 | ForEach-Object {
+Get-ChildItem -Path ./models -Filter *.ps1 | ForEach-Object {
+    . $_.FullName
+}
+
+Get-ChildItem -Path ./utils -Filter *.ps1 | ForEach-Object {
     . $_.FullName
 }
 
 # Load controllers from the Controllers folder
-Get-ChildItem -Path ./Controllers -Filter *.ps1 | ForEach-Object {
+Get-ChildItem -Path ./controllers -Filter *.ps1 | ForEach-Object {
     . $_.FullName
 }
 
@@ -25,6 +29,10 @@ try {
 	$stopFile = "./appoffline.htm"
 
 	While ($HttpListener.IsListening -and !(Test-Path -Path $stopFile)) {
+		if ([System.Console]::KeyAvailable -and [System.Console]::ReadKey($true).Key -eq 'Escape') {
+			break
+		}
+
 		# context variables
 		"new request" | Out-File -Append -FilePath "./log.txt"
 		$requestObject = [RequestObject]::new($HttpListener)
