@@ -1,0 +1,8 @@
+{
+  "ComicsFolderPaths": [
+    "./comics"
+  ],
+  "BooksFolderPaths": [
+    "./books"
+  ]
+}
