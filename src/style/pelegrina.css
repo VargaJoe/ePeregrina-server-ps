@@ -1,0 +1,226 @@
+html {
+  height: 100%;
+  font-size: 62.5%;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;  
+  -webkit-tap-highlight-color: transparent
+}
+
+body {
+  height: 100%;
+  font-size: 14px;
+  line-height: 1.71428571;
+  color: #eee;
+  margin: 0;
+  background: #3f4245 url(./static/preset-light.png);
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-attachment: fixed
+}
+
+header {
+  width: 100%;
+  height: 60px;
+  padding: 0 10px 0 3px;
+  background: rgba(0, 0, 0, .7);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+header .glyphicon {
+  position: unset;
+  top: 7px;
+  font-size: 24px
+}
+header .back-btn,
+header .home-btn {
+  padding: 0 15px
+}
+header .back-btn {
+  padding-right: 8px
+}
+header a:actve,
+header a:focus,
+header a:hover {
+  color: #eee;
+  outline: 0;
+  background: 0 0!important
+}
+
+/* start of search */
+header .searchicon {
+  left: 5px;
+  top: 0;
+  font-size: 12px
+}
+header .searchinput {
+  padding-left: 16px
+}
+.search {
+  font-size: 13px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  margin-left: 15px;
+  width: 360px;
+  height: 100%
+}
+@media only screen and (max-width: 768px) {
+  .search {
+    display: none
+  }
+}
+.search div {
+  font-size: 13px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-align: center;
+  align-items: center;
+  -ms-flex-flow: row nowrap;
+  flex-flow: row nowrap;
+  margin: 14px 0;
+  padding: 4px;
+  height: 30px;
+  border-radius: 4px;
+  background: rgba(255,255,255,.25);
+  color: #eee;
+  transition: background-color .2s,color .2s
+}
+.searchinput {
+  -ms-flex-positive: 1;
+  flex-grow: 1;
+  height: 100%;
+  outline: 0;
+  border: none;
+  background: 0 0;
+  color: #eee
+}
+.searchinput:-ms-clear {
+  display: none
+}
+/* end of search */
+
+/* start of icons */
+.glyphicon {
+  top: 1px;
+  display: inline-block;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale
+}
+.glyphicon.home:before {
+  content: "\E021"
+}
+.glyphicon.chevron-left:before {
+  content: "\E225"
+}
+.glyphicon.settings:before {
+  content: "\E281"
+}
+.glyphicon.random:before {
+  content: "\E084"
+}
+.glyphicon.log-out:before {
+  content: "\E388"
+}
+.glyphicon-search, 
+.plex-icon-search-560:before {
+  content: "\EA51"
+}
+/* end of icons */
+
+/* start of nav */
+.nav {
+  margin-bottom: 0;
+  padding-left: 0;
+  list-style: none
+}
+.nav:after,.nav:before {
+  content: " ";
+  display: table
+}
+.nav:after {
+  clear: both
+}
+
+.nav>li>a {
+  padding: 10px 15px
+}
+.nav>li>a:focus,.nav>li>a:hover {
+  text-decoration: none;
+  background-color: rgba(255,255,255,.05)
+}
+
+.nav-bar-nav>li>a {
+  padding-top: 0;
+  padding-bottom: 0;
+  line-height: 60px;
+  color: #999
+}
+.nav-bar-right {
+  right: 0
+}
+/* end of nav */
+
+/* start of content */
+.content {
+  clear: both;
+  overflow: hidden;
+  padding: 15px;
+  display: flex;
+  flex-wrap: wrap;
+}
+.content>a {
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-align: center;
+  align-items: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  width: 130px;
+  height: 130px;
+  margin: 15px;
+  padding: 5px;
+  transition: all .2s;
+  color: #000;
+  font-family: "Open Sans Semibold";
+  font-size: 18px;
+  text-align: center;
+  text-transform: uppercase;
+  line-height: 1.4;
+  box-shadow: 0 0 2px rgba(0,0,0,.35);
+  background-color: rgba(0,0,0,.45)
+}
+.content>a:actve,.content>a:focus,.content>a:hover {
+  color: #fff;
+  text-decoration: none;
+  box-shadow: 0 0 0 2px #cc7b19;
+  background-color: rgba(0,0,0,.8)!important
+}
+.content #orange {
+  background-color: #cc7b19
+}
+.content #blue {
+  background-color: #00bfbf
+}
+.content #files {
+  background-color: #fcce36
+}
+.content #latest-books,.content #latest-comics,.content .rootlink {
+  color: #fff;
+  border-color: #fff
+}
+.content br {
+  display: none
+}
+/* end of content */
+
+.poweredby {
+  display: none
+}
+

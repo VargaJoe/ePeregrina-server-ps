@@ -1,49 +1,51 @@
 # Use the following commands to bind/unbind SSL cert
 # netsh http add sslcert ipport=0.0.0.0:443 certhash=3badca4f8d38a85269085aba598f0a8a51f057ae "appid={00112233-4455-6677-8899-AABBCCDDEEFF}"
 # netsh http delete sslcert ipport=0.0.0.0:443 
-. ./Helper-Functions.ps1
+
+# Load helper functions from the Utils folder
+Get-ChildItem -Path ./models -Filter *.ps1 | ForEach-Object {
+    . $_.FullName
+}
+
+Get-ChildItem -Path ./utils -Filter *.ps1 | ForEach-Object {
+    . $_.FullName
+}
+
+# Load controllers from the Controllers folder
+Get-ChildItem -Path ./controllers -Filter *.ps1 | ForEach-Object {
+    . $_.FullName
+}
 
 $Global:JsonResult = $null
-$Global:Settings = [SettingsObject]::new()
+$Global:RootPath = $PSScriptRoot
 
+"new listener" | Out-File -Append -FilePath "./log.txt"
 $HttpListener = New-Object System.Net.HttpListener
 $HttpListener.Prefixes.Add("http://+:8888/")
 $HttpListener.Prefixes.Add("https://+:443/")
 $HttpListener.Start()
+
 try {
 	$stopFile = "./appoffline.htm"
 
 	While ($HttpListener.IsListening -and !(Test-Path -Path $stopFile)) {
+		if ([System.Console]::KeyAvailable -and [System.Console]::ReadKey($true).Key -eq 'Escape') {
+			break
+		}
 
-		$Result = 0
-	
 		# context variables
-		$context = $HttpListener.GetContext()
-		$requestObject = [RequestObject]::new($context)
-
-
-		Write-Output "localPath: $($requestObject.LocalPath)"
+		"new request" | Out-File -Append -FilePath "./log.txt"
+		$requestObject = [RequestObject]::new($HttpListener)
+		# Write-Output "localPath: $($requestObject.LocalPath)"
 		Write-Output "url: $($requestObject.RequestUrl)"
-		Write-Output "paths: $($requestObject.Paths)"
-		Write-Output "controller: $($requestObject.Controller)"
+		# Write-Output "paths: $($requestObject.Paths)"
+		# Write-Output "controller: $($requestObject.Controller)"
     
-		RouteRequest $requestObject $HttpListener
-	
-		$HttpResponse = $context.Response
-		$HttpResponse.Headers.Add("Content-Type", "application/json")
-		$HttpResponse.Headers.Add("Access-Control-Allow-Origin", "http://172.17.17.195:8080")
-		$HttpResponse.Headers.Add("Access-Control-Allow-Headers", "Content-Type")
-		$HttpResponse.StatusCode = 200
-		$jsondata = @{Step = $Plot; ExitCode = $Result; Output = $JsonResult } 
-		$object = new-object psobject -Property $jsondata 
-		$jsondata = $object | ConvertTo-Json -depth 100
-		$ResponseBuffer = [System.Text.Encoding]::UTF8.GetBytes($jsondata)
-		$HttpResponse.ContentLength64 = $ResponseBuffer.Length
-		$HttpResponse.OutputStream.Write($ResponseBuffer, 0, $ResponseBuffer.Length)
-		$HttpResponse.Close()
-		Write-Output "end..." # Newline
+		RouteRequest $requestObject
+		"end request" | Out-File -Append -FilePath "./log.txt"
 	}
 }
 finally {
 	$HttpListener.Stop()
+	"stop listener" | Out-File -Append -FilePath "./log.txt"
 }
