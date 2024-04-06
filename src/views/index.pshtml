@@ -1,0 +1,27 @@
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></meta>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" href="/style/pelegrina.css"></link>
+        <title>pelegrin</title>
+    </head>
+    <body>
+        <header>
+            <ul class="nav nav-bar-nav">
+                <li><a class="home-btn" href="/"><i class="glyphicon glyphicon-home"></i></a></li>
+            </ul>
+
+            <ul class="nav nav-bar-nav nav-bar-right">
+                <li><a href="./logout" title="Logout"><i class="glyphicon glyphicon-log-out"></i></a></li>
+            </ul>
+        </header>
+
+        <div class="content">
+            <a href="/comics" id="orange" class="rootlink">Comics</a>
+            <a href="/books" id="blue" class="rootlink">Books</a>
+            <br/>
+        </div>
+        <br/>
+        <br/><a href="http://myurl" class="poweredby">powered by pelegrina</a>
+    </body>
+</html>
