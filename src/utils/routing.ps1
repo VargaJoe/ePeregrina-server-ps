@@ -43,6 +43,11 @@ function RouteRequest($requestObject) {
     }
 }
 
+# additional routing:
+# - id: /category/{id}
+# - path: / category/{category_index}/{relative path}
+# - could be mvc like routing: /{controller}/{action}/{id}
+
 function RedirectRequest($requestObject, $newUrl) {
     $response = $requestObject.HttpContext.Response
     $response.StatusCode = 302

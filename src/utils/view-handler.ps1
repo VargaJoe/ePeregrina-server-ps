@@ -1,10 +1,10 @@
 function Show-View {
     param(
-        [parameter(Mandatory=$true)]
+        [parameter(Mandatory = $true)]
         [RequestObject]$requestObject,
-        [parameter(Mandatory=$true)]
+        [parameter(Mandatory = $true)]
         [string]$viewName,
-        [parameter(Mandatory=$false)]
+        [parameter(Mandatory = $false)]
         [Object]$model
     )
     "new response $viewName" | Out-File -Append -FilePath "./log.txt"
@@ -30,30 +30,30 @@ function Show-View {
     $regex = [regex]::new($pattern)
 
     # Initialize an array to store evaluated results
-$evaluatedSnippets = @()
+    $evaluatedSnippets = @()
 
-# Store the matches and their indices
-$matchIndices = @()
-foreach ($match in $regex.Matches($viewTemplate)) {
-    $codeSnippet = $match.Groups[1].Value  # Access the matched code snippet
-    Write-Host "matched: $($match.Groups[1].Value)"
-    # Evaluate the code snippet
-    $evaluatedSnippet = Invoke-Expression $codeSnippet
-    if ($evaluatedSnippet -is [array]) {
-        $evaluatedSnippet = $evaluatedSnippet -join " "
+    # Store the matches and their indices
+    $matchIndices = @()
+    foreach ($match in $regex.Matches($viewTemplate)) {
+        $codeSnippet = $match.Groups[1].Value  # Access the matched code snippet
+        Write-Host "matched: $($match.Groups[1].Value)"
+        # Evaluate the code snippet
+        $evaluatedSnippet = Invoke-Expression $codeSnippet
+        if ($evaluatedSnippet -is [array]) {
+            $evaluatedSnippet = $evaluatedSnippet -join " "
+        }
+        Write-Host "evaluated: $evaluatedSnippet"
+        $evaluatedSnippets += $evaluatedSnippet
+        $matchIndices += $match.Index
     }
-    Write-Host "evaluated: $evaluatedSnippet"
-    $evaluatedSnippets += $evaluatedSnippet
-    $matchIndices += $match.Index
-}
 
-# Replace the matched patterns with the evaluated results
-$evaluatedView = $regex.Replace($viewTemplate, {
-    param($match)
-    $index = [array]::IndexOf($matchIndices, $match.Index)
-    $evaluatedSnippet = $evaluatedSnippets[$index]  # Use the match index to get the evaluated snippet
-    return $evaluatedSnippet
-})
+    # Replace the matched patterns with the evaluated results
+    $evaluatedView = $regex.Replace($viewTemplate, {
+        param($match)
+        $index = [array]::IndexOf($matchIndices, $match.Index)
+        $evaluatedSnippet = $evaluatedSnippets[$index]  # Use the match index to get the evaluated snippet
+        return $evaluatedSnippet
+    })
    
 
     # $evaluatedView = [regex]::Replace($viewTemplate, $pattern, {

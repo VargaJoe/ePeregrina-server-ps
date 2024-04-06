@@ -1,12 +1,15 @@
 function Show-BooksController($requestObject) {
-    Write-Output "$($requestObject.Settings.booksPaths[0].pathString)"
-    $rootPath = $($requestObject.Settings.booksPaths[0].pathString)
-
-    $items = Get-ChildItem -Path $rootPath -Recurse
-
-    foreach ($item in $items) {
-        Write-Output $item.FullName
-    }
-
-    Show-View $requestObject "category"
+    Write-Output "paths: $($requestObject.Paths)"
+    $folderIndex = [int]$($requestObject.Paths[2]) ?? 0;
+    $relServerPath = ($requestObject.Paths[3..($requestObject.Paths.Count - 1)]) -join '/'
+    $rootPath = $($requestObject.Settings.booksPaths[$folderIndex].pathString)
+    $absServerPath = "$rootPath/$relServerPath"
+    
+    Write-Output "index: $folderIndex"
+    Write-Output "rel: $relFilePath"
+    Write-Output "root: $rootPath"
+    Write-Output "on server should be at: $absServerPath"
+    
+    $model = Get-ChildItem -Path $absServerPath #-Recurse
+    Show-View $requestObject "category" $model
 }
