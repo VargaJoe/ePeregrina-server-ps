@@ -36,7 +36,7 @@ function Show-View {
     $matchIndices = @()
     foreach ($match in $regex.Matches($viewTemplate)) {
         $codeSnippet = $match.Groups[1].Value  # Access the matched code snippet
-        Write-Host "matched: $($match.Groups[1].Value)"
+        Write-Host "matched: $codeSnippet"
         # Evaluate the code snippet
         $evaluatedSnippet = Invoke-Expression $codeSnippet
         if ($evaluatedSnippet -is [array]) {
