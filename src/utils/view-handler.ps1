@@ -42,7 +42,7 @@ function Show-View {
         if ($evaluatedSnippet -is [array]) {
             $evaluatedSnippet = $evaluatedSnippet -join " "
         }
-        Write-Host "evaluated: $evaluatedSnippet"
+        # Write-Host "evaluated: $evaluatedSnippet"
         $evaluatedSnippets += $evaluatedSnippet
         $matchIndices += $match.Index
     }
