@@ -1,5 +1,4 @@
 {
-  "webFolder": "./",
   "filesPaths" : [ ],
   "comicsPaths": [
     {
@@ -16,5 +15,7 @@
   "users" : [ {
     "name" : "username",
     "passwordHash" : "5346346436436436"
-  } ]
+  } ],
+  "webFolder": "./",
+  "containerFilter": ".zip|.cbz|.epub"
 }
