@@ -149,15 +149,33 @@ class RequestObject {
         if ($this.Paths.Count -gt $relativeIndex) {
             $this.RelativePath = $this.Paths[$relativeIndex..($this.Paths.Count - 1)] -Join "/"
 
-            $filter = ".zip|.cbz|.epub"
-            if ($this.RelativePath -match [regex]::Escape($filter)) {
-                # Split ProcessPath at the current containerFile
-                $parts = $this.RelativePath -split [regex]::Escape($filter), 2
-        
+            $ufilter = ($this.Settings.containerFilter) -join "|"
+            $efilter = ($this.Settings.containerFilter | ForEach-Object { [regex]::Escape($_) }) -join "|"
+            if ($this.RelativePath -match ".($ufilter)") {
+                Write-Host "MATCH!!!" $ufilter $this.RelativePath
+                
+                # $parts = $this.RelativePath -split "$ufilter"
+                # Write-Host "p1" "["$parts"]"
+                # $parts = $this.RelativePath -replace ".*$ufilter", ""
+                # Write-Host "p1" "["$parts"]"
+
+                $parts = ""
+                $index = 0
+                $match = [Regex]::Match($this.RelativePath, $ufilter)
+                if ($match.Success) {
+                    $index = $match.Index + $match.Value.Length
+                }
+                $this.VirtualPath = $this.RelativePath.Substring($index)
+                $this.RelativePath = $this.RelativePath.Substring(0, $index)
+                
+                Write-Host $this.VirtualPath
+                
                 # Assign the parts to $this.RelativePath and $this.VirtualPath
-                $this.RelativePath = $parts[0] 
-                $this.VirtualPath = $parts[1]
+                # $this.RelativePath = $parts[0] 
+                # $this.VirtualPath = $parts[1]
                 $this.IsContainer = $true
+            } else {
+                Write-Host "NO MATCH!!!" $efilter $this.RelativePath
             }
         }
 
@@ -166,8 +184,9 @@ class RequestObject {
             write-host "!!! $testFilePath exists !!!"
             $this.ContextPath = Resolve-Path -Path $testFilePath
             
-            if ((Test-Path -Path $this.ContextPath -PathType Leaf) -and (-not $this.IsContainer)) {
-                $this.Action = "View"
+            if ((Test-Path -Path $this.ContextPath -PathType Leaf)) {
+                Write-Host "File!!!"
+                # $this.Action = "View"
                 # Get the file extension from ContextPath
                 $this.FileExtension = [System.IO.Path]::GetExtension($this.ContextPath).TrimStart(".")
                 # Use the file extension to get the FileType from the FileTypes dictionary
@@ -178,8 +197,9 @@ class RequestObject {
                     Write-Host "!!! No FileType found for .$($this.FileExtension) !!!"
                 }
             } else {
+                Write-Host "Folder!!!"
                 $this.IsContainer = $true
-                $this.Action = "List"
+                # $this.Action = "List"
             }
         } else {
             write-host "!!! $testFilePath not exists !!!"
@@ -198,14 +218,13 @@ class RequestObject {
                 Show-HomeController $this
             }
             "Category" {
-                if ($this.IsContainer) {
+                if ($this.IsContainer -and $this.FileType -eq "") {
                     Write-Host "Category page"
                     Show-CategoryController $this
                 } else {
                     $functionName = "Show-" + $this.FileType + "Controller"
                     if (Get-Command $functionName -ErrorAction SilentlyContinue) {
                         Write-Host "function" $functionName
-                        # Call the function dynamically based on the controller name if exists
                         & $functionName $this
                     } else {
                         Write-Host "function not found" $functionName
