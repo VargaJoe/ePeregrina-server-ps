@@ -22,6 +22,8 @@ class RequestObject {
     # url path
     [string]$RelativePath
     [bool]$IsContainer
+    [string]$FileExtension
+    [string]$FileType
     # index of item in folder
     [string]$ItemIndex
     # path to the file or folder on the webserver
@@ -57,6 +59,8 @@ class RequestObject {
         $this.FolderPathResolved = ""
         $this.RelativePath = ""
         $this.IsContainer = $false
+        $this.FileExtension = ""
+        $this.FileType = ""
         $this.VirtualPath = ""
         $this.ContextPath = ""
         $this.Action = ""
@@ -164,21 +168,22 @@ class RequestObject {
             
             if ((Test-Path -Path $this.ContextPath -PathType Leaf) -and (-not $this.IsContainer)) {
                 $this.Action = "View"
+                # Get the file extension from ContextPath
+                $this.FileExtension = [System.IO.Path]::GetExtension($this.ContextPath).TrimStart(".")
+                # Use the file extension to get the FileType from the FileTypes dictionary
+                $this.FileType = $this.Settings.FileTypes.($this.FileExtension)
+
+                # If FileType is $null, the file extension didn't match any key in the FileTypes dictionary
+                if ($null -eq $this.FileType) {
+                    Write-Host "!!! No FileType found for .$($this.FileExtension) !!!"
+                }
             } else {
+                $this.IsContainer = $true
                 $this.Action = "List"
             }
         } else {
             write-host "!!! $testFilePath not exists !!!"
         }
-
-        # write-host "r0" $this.RequestType
-        # write-host "r1" $this.Controller
-        # write-host "r2" $this.Category
-        # write-host "r3" $this.FolderIndex
-        # write-host "r4" $this.FolderPath
-        # write-host "r5" $this.RelativePath
-        # write-host "r6" $this.VirtualPath
-        # write-host "r7" $this.ContextPath
     }
 
     RouteRequest() {
@@ -193,11 +198,18 @@ class RequestObject {
                 Show-HomeController $this
             }
             "Category" {
-                # Show-CategoryController $this
-                if ($this.Action -eq "View") {
-                    Show-ItemController $this
-                } elseif ($this.Action -eq "List") {
+                if ($this.IsContainer) {
+                    Write-Host "Category page"
                     Show-CategoryController $this
+                } else {
+                    $functionName = "Show-" + $this.FileType + "Controller"
+                    if (Get-Command $functionName -ErrorAction SilentlyContinue) {
+                        Write-Host "function" $functionName
+                        # Call the function dynamically based on the controller name if exists
+                        & $functionName $this
+                    } else {
+                        Write-Host "function not found" $functionName
+                    }
                 }
             }
             "Error" {

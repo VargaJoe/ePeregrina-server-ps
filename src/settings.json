@@ -17,5 +17,14 @@
     "passwordHash" : "5346346436436436"
   } ],
   "webFolder": "./",
-  "containerFilter": ".zip|.cbz|.epub"
+  "containerFilter": ".zip|.cbz|.epub",
+  "FileTypes": {
+    "jpeg": "image",
+    "jpg": "image",
+    "png": "image",
+    "gif": "image",
+    "cbz": "comic",
+    "epub": "book",
+    "txt": "text"
+  }
 }

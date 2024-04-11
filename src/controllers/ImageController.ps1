@@ -1,4 +1,4 @@
-function Show-ItemController($requestObject) {
+function Show-ImageController($requestObject) {
     Write-Host "1 $($requestObject.Controller)"
     Write-Host "2 $($requestObject.Category)"
     Write-Host "index $($requestObject.FolderIndex)"
@@ -10,7 +10,7 @@ function Show-ItemController($requestObject) {
     # Create model
     $model = @{
         category = "image"
-        "image" = Get-ImageData -ImagePath $requestObject.ContextPath
+        image = Get-ImageData -ImagePath $requestObject.ContextPath
     }
 
     Show-View $requestObject "image" $model
