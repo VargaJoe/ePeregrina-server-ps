@@ -218,9 +218,27 @@ class RequestObject {
                 Show-HomeController $this
             }
             "Category" {
-                if ($this.IsContainer -and $this.FileType -eq "") {
-                    Write-Host "Category page"
-                    Show-CategoryController $this
+                if ($this.IsContainer) {
+                    if ($this.FileType -eq "") {
+                        Write-Host "Category page"
+                        Show-CategoryController $this
+                    } elseif ($this.VirtualPath -eq "") {
+                        $functionName = "Show-" + $this.FileType + "Controller"
+                        if (Get-Command $functionName -ErrorAction SilentlyContinue) {
+                            Write-Host "function" $functionName
+                            & $functionName $this
+                        } else {
+                            Write-Host "function not found" $functionName
+                        }
+                    } else {
+                        $functionName = "Show-" + $this.FileType + "ItemController"
+                        if (Get-Command $functionName -ErrorAction SilentlyContinue) {
+                            Write-Host "function" $functionName
+                            & $functionName $this
+                        } else {
+                            Write-Host "function not found" $functionName
+                        }
+                    }
                 } else {
                     $functionName = "Show-" + $this.FileType + "Controller"
                     if (Get-Command $functionName -ErrorAction SilentlyContinue) {
