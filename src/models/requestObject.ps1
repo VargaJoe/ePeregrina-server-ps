@@ -22,8 +22,10 @@ class RequestObject {
     # url path
     [string]$RelativePath
     [bool]$IsContainer
-    [string]$FileExtension
-    [string]$FileType
+    [string]$ContextFileType
+    [string]$ContextModelType
+    [string]$VirtualFileType
+    [string]$ContextPageType
     # index of item in folder
     [string]$ItemIndex
     # path to the file or folder on the webserver
@@ -61,8 +63,10 @@ class RequestObject {
         $this.FolderPathResolved = ""
         $this.RelativePath = ""
         $this.IsContainer = $false
-        $this.FileExtension = ""
-        $this.FileType = "" # rather page type or controller type?
+        $this.ContextFileType = ""
+        $this.ContextModelType = ""
+        $this.VirtualFileType = ""
+        $this.ContextPageType = ""        
         $this.VirtualPath = ""
         $this.ContextPath = ""
         $this.ReducedLocalPath = $this.LocalPath
@@ -191,14 +195,19 @@ class RequestObject {
             if ((Test-Path -Path $this.ContextPath -PathType Leaf)) {
                 Write-Host "File!!!"
                 # $this.Action = "View"
-                # Get the file extension from ContextPath
-                $this.FileExtension = [System.IO.Path]::GetExtension($this.ContextPath).TrimStart(".")
-                # Use the file extension to get the FileType from the FileTypes dictionary
-                $this.FileType = $this.Settings.FileTypes.($this.FileExtension)
+
+                # Get the file extension from ContextPath so the addressed file can be opened
+                $this.ContextFileType = [System.IO.Path]::GetExtension($this.ContextPath).TrimStart(".")
+                $this.ContextModelType = $this.Settings.FileTypes.($this.ContextFileType)
+                
+                # Get the file extension from VirtualPath so page will work even with addressed files inside container files
+                $this.VirtualFileType = [System.IO.Path]::GetExtension($this.VirtualPath).TrimStart(".")
+                $typeIndexer = if ($this.VirtualFileType) { $this.VirtualFileType } else { $this.ContextFileType }
+                $this.ContextPageType = $this.Settings.FileTypes.($typeIndexer)
 
                 # If FileType is $null, the file extension didn't match any key in the FileTypes dictionary
-                if ($null -eq $this.FileType) {
-                    Write-Host "!!! No FileType found for .$($this.FileExtension) !!!"
+                if ($null -eq $this.ContextPageType) {
+                    Write-Host "!!! No PageType found for .$($this.VirtualFileType) !!!"
                 }
             } else {
                 Write-Host "Folder!!!"
@@ -211,103 +220,71 @@ class RequestObject {
     }
 
     RouteRequest() {
-        switch ($this.RequestType) {
-            "Controller" {
-                & $this.ControllerFunction $this
+        if ($this.RequestType -eq "Controller") {
+            # Controller mode is handled by the controller function via naming convention
+            & $this.ControllerFunction $this
+            return
+        }
+
+        if ($this.RequestType -eq "File") {
+            # If file exists on path file mode is handled by the binary handler
+            BinaryHandler $this
+            return
+        }
+
+        if ($this.RequestType -eq "Index") {
+            # Index page is handled by the HomeController
+            Show-HomeController $this
+            return
+        }
+
+        if ($this.RequestType -eq "Category" -and $this.IsContainer -and $this.ContextPageType -eq "") {
+            # This is a category page on main level
+            Show-CategoryController $this
+            return
+        }
+
+        if ($this.RequestType -eq "Category" -and $this.IsContainer -and $this.ContextPageType -ne "" -and $this.VirtualPath -eq "") {
+            # This is a list page of container file
+            $functionName = "Show-" + $this.ContextPageType + "Controller"
+            if (Get-Command $functionName -ErrorAction SilentlyContinue) {
+                Write-Host "function" $functionName
+                & $functionName $this
+            } else {
+                Write-Host "function not found" $functionName
             }
-            "File" {
-                BinaryHandler $this
+            return
+        }
+
+        if ($this.RequestType -eq "Category" -and $this.IsContainer -and $this.ContextPageType -ne "" -and $this.VirtualPath -ne "") {
+            # This is a content page of container file
+            $functionName = "Show-" + $this.ContextPageType + "Controller"
+            if (Get-Command $functionName -ErrorAction SilentlyContinue) {
+                Write-Host "function" $functionName
+                & $functionName $this
+            } else {
+                Write-Host "function not found" $functionName
             }
-            "Index" {
-                Show-HomeController $this
-            }
-            "Category" {
-                if ($this.IsContainer) {
-                    if ($this.FileType -eq "") {
-                        Write-Host "Category page"
-                        Show-CategoryController $this
-                    } elseif ($this.VirtualPath -eq "") {
-                        $functionName = "Show-" + $this.FileType + "Controller"
-                        if (Get-Command $functionName -ErrorAction SilentlyContinue) {
-                            Write-Host "function" $functionName
-                            & $functionName $this
-                        } else {
-                            Write-Host "function not found" $functionName
-                        }
-                    } else {
-                        $functionName = "Show-" + $this.FileType + "ItemController"
-                        if (Get-Command $functionName -ErrorAction SilentlyContinue) {
-                            Write-Host "function" $functionName
-                            & $functionName $this
-                        } else {
-                            Write-Host "function not found" $functionName
-                        }
-                    }
-                } else {
-                    $functionName = "Show-" + $this.FileType + "Controller"
-                    if (Get-Command $functionName -ErrorAction SilentlyContinue) {
-                        Write-Host "function" $functionName
-                        & $functionName $this
-                    } else {
-                        Write-Host "function not found" $functionName
-                    }
-                }
-            }
-            "Error" {
-                # Show-ErrorController $this
-                BinaryHandler $this
-            }
-            default {
-               # Show-ErrorController $this 
+            return
+        }
+
+        if ($this.RequestType -eq "Category" -and $this.IsContainer -eq $false) {
+            # this is an ordinary content page
+            $functionName = "Show-" + $this.ContextPageType + "Controller"
+            if (Get-Command $functionName -ErrorAction SilentlyContinue) {
+                Write-Host "function" $functionName
+                & $functionName $this
+            } else {
+                Write-Host "function not found" $functionName
             }
         }
-    }
 
-    RouteRequestOld() {
-        switch ($this.Controller.ToLower()) {
-            "shutdown" {
-                # "`nListener shutting down..."
-                $this.HttpListener.Stop()
-                exit
-            }
-            "restart" {
-                $stackListener = $this.HttpListener
-                # "`nListener shutting down..."
-                $this.HttpListener.Stop()
-                
-                # "`nListener starting..."
-                $this.HttpListener.Start()
-                
-                # "`nRedirect to root to prevent infinite loop..."
-                $requestObject = [RequestObject]::new($stackListener)
-                RedirectRequest $requestObject "/"
-            }
-            "reload" {
-                # "`nListener shutting down..."
-                $this.HttpListener.Stop()
-                
-                # "`nReloading script, so the listener will restart..."
-                . ./Http-Listener.ps1
-            }
-            "" {
-                Show-HomeController $requestObject
-            }
-            "index" {
-                Show-HomeController $requestObject
-            }
-            default {
-                # The function name should be in the format "Show-{Controller}"
-                $functionName = "Show-" + $this.Controller + "Controller"
-                if (Get-Command $functionName -ErrorAction SilentlyContinue) {
-                    # Call the function dynamically based on the controller name if exists
-                    & $functionName $requestObject
-                } else {
-                    # If the controller does not exist, treat it as a binary request
-                    BinaryHandler $requestObject
-                }
-            }
+        if ($this.RequestType -eq "Error") {
+            # Error page is handled by the ErrorController
+            # Show-ErrorController $this
+            BinaryHandler $this
+            return
         }
     }
-
 }
 
