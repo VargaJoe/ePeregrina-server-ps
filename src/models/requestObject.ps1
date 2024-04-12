@@ -3,7 +3,7 @@ class RequestObject {
     [System.Net.HttpListenerContext]$HttpContext
     [System.Net.HttpListenerRequest]$HttpRequest
     [System.Uri]$RequestUrl
-    [string]$LocalPath
+    [string]$LocalPath # url path without domain
     [string[]]$Paths
     [string]$Body
     [System.Collections.Specialized.NameValueCollection]$UrlVariables
@@ -32,6 +32,7 @@ class RequestObject {
     [string]$ContextPath
     # path to the file or folder on webserver or under the container
     [string]$VirtualPath
+    [string]$ReducedLocalPath # Local path without the virtual path
     # action to be performed
     [string]$Action
 
@@ -50,6 +51,7 @@ class RequestObject {
         $settingsFilePath = "./settings.json"
         $this.Settings = Get-Content $settingsFilePath | ConvertFrom-Json
 
+        # https://domain/category/folderindex/relativepath/virtualpath
         # default
         $this.Controller = ""
         $this.ControllerFunction = ""
@@ -60,9 +62,10 @@ class RequestObject {
         $this.RelativePath = ""
         $this.IsContainer = $false
         $this.FileExtension = ""
-        $this.FileType = ""
+        $this.FileType = "" # rather page type or controller type?
         $this.VirtualPath = ""
         $this.ContextPath = ""
+        $this.ReducedLocalPath = $this.LocalPath
         $this.Action = ""
 
         Write-Host $this.RequestUrl
@@ -167,6 +170,7 @@ class RequestObject {
                 }
                 $this.VirtualPath = $this.RelativePath.Substring($index)
                 $this.RelativePath = $this.RelativePath.Substring(0, $index)
+                $this.ReducedLocalPath = $this.LocalPath.Substring(0, $this.LocalPath.Length - $this.VirtualPath.Length)
                 
                 Write-Host $this.VirtualPath
                 
