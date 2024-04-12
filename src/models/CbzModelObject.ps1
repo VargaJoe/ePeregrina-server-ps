@@ -13,11 +13,11 @@ class CbzModelObject {
             pager = @{
                 prev = $prevIndex -ge 0 ? $imgObj.ToC[$prevIndex] : $null
                 next = $nextIndex -lt $imgObj.ToC.Count ? $imgObj.ToC[$nextIndex] : $null
-            }        
+            }
             image = @{
                 Name = $selectedImage
                 Data = $imgObj.Data
-            }       
+            }
         }    
     }
 
