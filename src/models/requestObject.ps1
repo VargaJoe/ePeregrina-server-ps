@@ -78,8 +78,8 @@ class RequestObject {
         $webRootPath = ($this.Settings.webFolder) -replace "../", "/" -replace "./", "/" -replace "//", "/"
         if ($webRootPath.startswith("/")) {
             $webRootPath = $Global:RootPath + $webRootPath
-            if (Test-Path $webRootPath) {
-                $webRootPath = Resolve-Path -Path $webRootPath
+            if (Test-Path -LiteralPath $webRootPath) {
+                $webRootPath = Resolve-Path -LiteralPath $webRootPath
             } else {
                 write-host "webRootPath not found: $webRootPath"
                 exit
@@ -96,13 +96,13 @@ class RequestObject {
         }
 
         $testFilePath = Join-Path -Path $webRootPath.Path -ChildPath $this.LocalPath
-        if (Test-Path $testFilePath -PathType Leaf) {
+        if (Test-Path -LiteralPath $testFilePath -PathType Leaf) {
             # File page
             Write-Host "File resource"
             $this.RequestType = "File"
             $this.Controller = "File"
             $this.Action = "Stream"
-            $this.ContextPath = Resolve-Path -Path $testFilePath
+            $this.ContextPath = Resolve-Path -LiteralPath $testFilePath
             # Write-Host "RequestType" $this.RequestType
             return
         }
@@ -136,8 +136,8 @@ class RequestObject {
             $relativeIndex = 3
         }
 
-        if (Test-Path -Path $this.FolderPath) {
-            $this.FolderPathResolved = Resolve-Path -Path $this.FolderPath            
+        if (Test-Path -LiteralPath $this.FolderPath) {
+            $this.FolderPathResolved = Resolve-Path -LiteralPath $this.FolderPath            
         }
 
         if ($this.FolderPathResolved -eq "") {
@@ -188,11 +188,11 @@ class RequestObject {
         }
 
         $testFilePath = Join-Path -Path $this.FolderPath -ChildPath $this.RelativePath        
-        if (Test-Path -Path $testFilePath) {
+        if (Test-Path -LiteralPath $testFilePath) {
             write-host "!!! $testFilePath exists !!!"
-            $this.ContextPath = Resolve-Path -Path $testFilePath
+            $this.ContextPath = Resolve-Path -LiteralPath $testFilePath
             
-            if ((Test-Path -Path $this.ContextPath -PathType Leaf)) {
+            if ((Test-Path -LiteralPath $this.ContextPath -PathType Leaf)) {
                 Write-Host "File!!!"
                 # $this.Action = "View"
 
@@ -221,30 +221,35 @@ class RequestObject {
 
     RouteRequest() {
         if ($this.RequestType -eq "Controller") {
+            Write-Host "Controller page"
             # Controller mode is handled by the controller function via naming convention
             & $this.ControllerFunction $this
             return
         }
 
         if ($this.RequestType -eq "File") {
+            Write-Host "File resource"
             # If file exists on path file mode is handled by the binary handler
             BinaryHandler $this
             return
         }
 
         if ($this.RequestType -eq "Index") {
+            Write-Host "Index page"
             # Index page is handled by the HomeController
             Show-HomeController $this
             return
         }
 
         if ($this.RequestType -eq "Category" -and $this.IsContainer -and $this.ContextPageType -eq "") {
+            Write-Host "Category page main level"
             # This is a category page on main level
             Show-CategoryController $this
             return
         }
 
         if ($this.RequestType -eq "Category" -and $this.IsContainer -and $this.ContextPageType -ne "" -and $this.VirtualPath -eq "") {
+            Write-Host "Category page with folder index"
             # This is a list page of container file
             $functionName = "Show-" + $this.ContextPageType + "Controller"
             if (Get-Command $functionName -ErrorAction SilentlyContinue) {
@@ -257,6 +262,7 @@ class RequestObject {
         }
 
         if ($this.RequestType -eq "Category" -and $this.IsContainer -and $this.ContextPageType -ne "" -and $this.VirtualPath -ne "") {
+            Write-Host "Category page with folder index and virtual path"
             # This is a content page of container file
             $functionName = "Show-" + $this.ContextPageType + "Controller"
             if (Get-Command $functionName -ErrorAction SilentlyContinue) {
@@ -269,6 +275,7 @@ class RequestObject {
         }
 
         if ($this.RequestType -eq "Category" -and $this.IsContainer -eq $false) {
+            Write-Host "Category page with a file"
             # this is an ordinary content page
             $functionName = "Show-" + $this.ContextPageType + "Controller"
             if (Get-Command $functionName -ErrorAction SilentlyContinue) {
@@ -280,6 +287,7 @@ class RequestObject {
         }
 
         if ($this.RequestType -eq "Error") {
+            Write-Host "404 page"
             # Error page is handled by the ErrorController
             # Show-ErrorController $this
             BinaryHandler $this
