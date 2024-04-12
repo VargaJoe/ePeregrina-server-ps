@@ -10,7 +10,7 @@ function Show-CbzController($requestObject) {
      $model = @{
          category = "cbz"
          items = Get-ZipContents -Path $requestObject.ContextPath | ForEach-Object {
-             $relUrlPath = $requestObject.LocalPath + "/" + "$($_.FullName -replace "/", "|")"
+             $relUrlPath = $requestObject.LocalPath + "/" + "$($_.FullName)"
      
              # Create a custom object
              New-Object PSObject -Property @{
@@ -29,7 +29,7 @@ function Get-ZipContents {
     )
 
     $zipFile = [System.IO.Compression.ZipFile]::OpenRead("$Path")
-    $result = $zipFile.Entries 
+    $result = $zipFile.Entries | Where-Object { $_.FullName -notlike "__MACOSX*" -and $_.FullName -notlike "*/" }
     $zipFile.Dispose()
     return $result
 }

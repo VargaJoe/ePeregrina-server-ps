@@ -35,7 +35,7 @@ class CbzModelObject {
     }
     
     [PSCustomObject]GetImageDataWithPagerFromZip([string]$ZipFilePath, [string]$ImageName) {
-        $zipObj = Get-ZipFileContentWithPager -ZipFilePath $ZipFilePath -FileName $ImageName
+        $zipObj = $this.GetZipFileContentWithPager($ZipFilePath, $ImageName)
         $imageContent = [System.Convert]::ToBase64String($zipObj.bytes)
         $imageModel = [PSCustomObject]@{
             Name = $ImageName
@@ -48,8 +48,8 @@ class CbzModelObject {
 
     [PSCustomObject]GetZipFileContentWithPager([string]$ZipFilePath,[string]$FileName) {
         $zipFile = [System.IO.Compression.ZipFile]::OpenRead($ZipFilePath)
-        $toc = $zipFile.Entries | ForEach-Object {
-            $relUrlPath = $requestObject.ReducedLocalPath + "/" + "$($_.FullName -replace "/", "|")"
+        $toc = $zipFile.Entries | Where-Object { $_.FullName -notlike "__MACOSX*" -and $_.FullName -notlike "*/" } | ForEach-Object {
+            $relUrlPath = $requestObject.ReducedLocalPath + "/" + "$($_.FullName)"
             
             # Create a custom object
             New-Object PSObject -Property @{
