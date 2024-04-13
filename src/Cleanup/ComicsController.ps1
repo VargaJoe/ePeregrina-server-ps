@@ -32,6 +32,15 @@ function Show-ComicsController($requestObject) {
     Write-Output "root: $rootPath"
     Write-Output "on server should be at: $absServerPath"
 
+
+    Write-Output "1 $($requestObject.Controller)"
+    Write-Output "2 $($requestObject.Category)"
+    Write-Output "3 $($requestObject.FolderIndex)"
+    Write-Output "4 $($requestObject.FolderPath)"
+    Write-Output "5 $($requestObject.RelativePath)"
+    Write-Output "6 $($requestObject.VirtualPath)"
+
+
     if (-not ($requestObject.Paths[-1] -eq "view")) {
         # category container
         # Create model
