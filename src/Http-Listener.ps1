@@ -41,7 +41,9 @@ try {
 		# Write-Output "paths: $($requestObject.Paths)"
 		# Write-Output "controller: $($requestObject.Controller)"
     
-		RouteRequest $requestObject
+		# RouteRequest $requestObject
+		$requestObject.RouteRequest()
+		
 		"end request" | Out-File -Append -FilePath "./log.txt"
 	}
 }
