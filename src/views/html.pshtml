@@ -21,10 +21,8 @@
             </ul>
         </header>
 
-        <div class="content">
+        <div class="epubcontent">
             <%$model.htmlFile.Data%>
-            <br/>
-            <br/>
         </div>
         <br/>
         <br/><a href="http://myurl" class="poweredby">powered by pelegrina</a>
