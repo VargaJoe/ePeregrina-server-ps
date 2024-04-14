@@ -38,8 +38,8 @@ class RequestObject {
     [string]$ReducedLocalPath # Local path without the virtual path
     # action to be performed
     [string]$Action
-
     [string]$RequestType
+    [bool]$IsResource
     
     RequestObject([System.Net.HttpListener] $listener) {
         $this.HttpListener = $listener
@@ -73,8 +73,23 @@ class RequestObject {
         $this.ContextPath = ""
         $this.ReducedLocalPath = $this.LocalPath
         $this.Action = ""
+        $this.IsResource = ""
 
+        Write-Host 
+        Write-Host 
         Write-Host $this.RequestUrl
+        Write-Host "referrer" $this.HttpRequest.Headers["Referer"]
+        Write-Host "accept" $this.HttpRequest.Headers["Accept"]
+        Write-Host "user agent" $this.HttpRequest.UserAgent
+
+        # if ($null -eq $this.HttpRequest.Headers["Referer"] -or $this.HttpRequest.Headers["Referer"] -notmatch "^https?://(www\.)?yourwebsite\.com") {
+        # if ($null -eq $this.HttpRequest.Headers["Referer"] -or $this.HttpRequest.Headers["Referer"] -notmatch "^https?://(www\.)?localhost:8888") {
+        #     Write-Host "User likely navigated to URL $($this.HttpRequest.Url) directly"
+        # } elseif ($this.HttpRequest.Headers["Accept"] -match "image/*") {
+        #     Write-Host "Request for URL $($this.HttpRequest.Url) likely came from an image tag"
+        # } else {
+        #     Write-Host "Request for URL $($this.HttpRequest.Url) came from $($this.HttpRequest.Headers["Referer"])"
+        # }
 
         # webroot should be global from start script
         $webRootPath = ($this.Settings.webFolder) -replace "../", "/" -replace "./", "/" -replace "//", "/"
@@ -225,6 +240,11 @@ class RequestObject {
         } else {
             write-host "!!! $testFilePath not exists !!!"
         }
+
+        # is there better way to distinguish resource request from content request?        
+        if ($this.HttpRequest.Headers["Referer"] -match "\.html" -and $this.ContextFileType -ne "html" -and $this.VirtualFileType -ne "html") {
+            $this.IsResource = $true
+        }
     }
 
     RouteRequest() {
@@ -268,7 +288,7 @@ class RequestObject {
         }
 
         # /category/folderindex/relativepath.known + context IS NOT container
-        if ($this.RequestType -eq "Category" -and $this.IsContainer -eq $false -and $this.ContextPageType -ne "") {
+        if ($this.RequestType -eq "Category" -and $this.IsContainer -eq $false -and $this.ContextPageType -ne "" -and -not $this.IsResource) {
             Write-Host "Pelegrina page with a mapped file"
             # this is an ordinary content page
             $functionName = "Show-" + $this.ContextPageType + "Controller"
@@ -279,7 +299,14 @@ class RequestObject {
                 Write-Host "function not found" $functionName
             }
             return
-        }        
+        }
+
+        # /category/folderindex/relativepath.known + context IS NOT container
+        if ($this.RequestType -eq "Category" -and $this.IsContainer -eq $false -and $this.ContextPageType -ne "" -and $this.IsResource) {
+            Write-Host "Pelegrina page with a mapped file REFERRED RESOURCE"
+            BinaryHandler $this
+            return
+        }
         
         # /category/folderindex/relativepath.unknown + context IS container (folder)
         if ($this.RequestType -eq "Category" -and $this.RelativePath -ne "" -and $this.IsContainer -and $this.ContextPageType -eq "" -and $this.isfile -eq $false) {
@@ -322,7 +349,7 @@ class RequestObject {
         }
 
         # /category/folderindex/relativepath/virtualpath.known + context IS container 
-        if ($this.RequestType -eq "Category" -and $this.IsContainer -and $this.ContextPageType -ne "" -and $this.VirtualPath -ne "") {
+        if ($this.RequestType -eq "Category" -and $this.IsContainer -and $this.ContextPageType -ne "" -and $this.VirtualPath -ne "" -and -not $this.IsResource) {
             Write-Host "Pelegrina page with content of cointainer file on a virtual path"
             # This is a content page of container file
             $functionName = "Show-" + $this.ContextPageType + "Controller"
@@ -332,6 +359,14 @@ class RequestObject {
             } else {
                 Write-Host "function not found" $functionName
             }
+            return
+        }
+        
+        # /category/folderindex/relativepath/virtualpath.known + context IS container 
+        if ($this.RequestType -eq "Category" -and $this.IsContainer -and $this.ContextPageType -ne "" -and $this.VirtualPath -ne "" -and $this.IsResource) {
+            Write-Host "Pelegrina page with content of cointainer file on a virtual path REFERRED RESOURCE"
+            # it should return the file
+            VirtualBinaryHandler $this
             return
         }
 

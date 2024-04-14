@@ -53,7 +53,7 @@ class ResponseObject {
                     # Write-Host "Error writing to OutputStream: $_"
                 }
             }
-            $this.HttpResponse.Headers.Add("Content-Type", $this.ContentType)
+            $this.HttpResponse.Headers.Add("Content-Type", $this.ContentType)            
         } catch {
             $this.HttpResponse.StatusCode = 500
         } finally {
