@@ -22,6 +22,7 @@ class RequestObject {
     # url path
     [string]$RelativePath
     [bool]$IsContainer
+    [bool]$IsFile
     [string]$ContextFileType
     [string]$ContextModelType
     [string]$VirtualFileType
@@ -63,6 +64,7 @@ class RequestObject {
         $this.FolderPathResolved = ""
         $this.RelativePath = ""
         $this.IsContainer = $false
+        $this.IsFile = $false
         $this.ContextFileType = ""
         $this.ContextModelType = ""
         $this.VirtualFileType = ""
@@ -181,7 +183,10 @@ class RequestObject {
                 # Assign the parts to $this.RelativePath and $this.VirtualPath
                 # $this.RelativePath = $parts[0] 
                 # $this.VirtualPath = $parts[1]
+
+                # it is a container file
                 $this.IsContainer = $true
+                $this.IsFile = $true
             } else {
                 Write-Host "NO MATCH!!!" $efilter $this.RelativePath
             }
@@ -209,9 +214,12 @@ class RequestObject {
                 if ($null -eq $this.ContextPageType) {
                     Write-Host "!!! No PageType found for .$($this.VirtualFileType) !!!"
                 }
+                
+                $this.IsFile = $true
             } else {
                 Write-Host "Folder!!!"
                 $this.IsContainer = $true
+                # $this.IsFile = $false
                 # $this.Action = "List"
             }
         } else {
@@ -220,6 +228,7 @@ class RequestObject {
     }
 
     RouteRequest() {
+        # /controller/action/parameter/s
         if ($this.RequestType -eq "Controller") {
             Write-Host "Controller page"
             # Controller mode is handled by the controller function via naming convention
@@ -227,6 +236,8 @@ class RequestObject {
             return
         }
 
+        # /favicon.ico
+        # /styles/style.css
         if ($this.RequestType -eq "File") {
             Write-Host "File resource"
             # If file exists on path file mode is handled by the binary handler
@@ -234,6 +245,9 @@ class RequestObject {
             return
         }
 
+        # /
+        # /index
+        # /home
         if ($this.RequestType -eq "Index") {
             Write-Host "Index page"
             # Index page is handled by the HomeController
@@ -241,15 +255,61 @@ class RequestObject {
             return
         }
 
-        if ($this.RequestType -eq "Category" -and $this.IsContainer -and $this.ContextPageType -eq "") {
-            Write-Host "Category page main level"
-            # This is a category page on main level
+        # peregrine ebook server url structure
+        # /category/folderindex/relativepath/virtualpath
+
+        # /category
+        # /category/folderindex
+        if ($this.RequestType -eq "Category" -and $this.RelativePath -eq "") {
+            Write-Host "Pelegrina page main level - show shared categories"
+            # This is a Pelegrina page on main level
             Show-CategoryController $this
             return
         }
 
-        if ($this.RequestType -eq "Category" -and $this.IsContainer -and $this.ContextPageType -ne "" -and $this.VirtualPath -eq "") {
-            Write-Host "Category page with folder index"
+        # /category/folderindex/relativepath.known + context IS NOT container
+        if ($this.RequestType -eq "Category" -and $this.IsContainer -eq $false -and $this.ContextPageType -ne "") {
+            Write-Host "Pelegrina page with a mapped file"
+            # this is an ordinary content page
+            $functionName = "Show-" + $this.ContextPageType + "Controller"
+            if (Get-Command $functionName -ErrorAction SilentlyContinue) {
+                Write-Host "function" $functionName
+                & $functionName $this
+            } else {
+                Write-Host "function not found" $functionName
+            }
+            return
+        }        
+        
+        # /category/folderindex/relativepath.unknown + context IS container (folder)
+        if ($this.RequestType -eq "Category" -and $this.RelativePath -ne "" -and $this.IsContainer -and $this.ContextPageType -eq "" -and $this.isfile -eq $false) {
+            Write-Host "Pelegrina page with a folder - show list of contents"
+            # if folder it should return the list of files            
+            Show-CategoryController $this
+            return
+        }
+
+        # /category/folderindex/relativepath.unknown + context IS container (file)
+        if ($this.RequestType -eq "Category" -and $this.RelativePath -ne "" -and $this.IsContainer -and $this.ContextPageType -eq "" -and $this.isfile -and $this.VirtualPath -eq "") {
+            Write-Host "Pelegrina page with an unknown file container - download the file"
+            # if container file it should return the file
+            BinaryHandler $this
+            return
+        }
+
+#!!!    # /category/folderindex/relativepath.unknown + context IS NOT container
+        if ($this.RequestType -eq "Category" -and $this.RelativePath -ne "" -and $this.IsContainer -eq $false -and $this.ContextPageType -eq "") {
+            Write-Host "Pelegrina page with an unknown file - download the file"
+            # it should return the file
+            BinaryHandler $this
+            return
+        }
+
+#!!!    # /category/folderindex/relativepath.known + context IS container (- is it matter if it is a container ot not?)
+        # it is a previous logic - now it does not matter the context is container or not
+        # contextType is the mapping for context file type - if it is set the appropriate controll will be called no matter what
+        if ($this.RequestType -eq "Category" -and $this.RelativePath -ne "" -and $this.IsContainer -and $this.ContextPageType -ne "" -and $this.VirtualPath -eq "") {
+            Write-Host "Pelegrina page with list of container file"
             # This is a list page of container file
             $functionName = "Show-" + $this.ContextPageType + "Controller"
             if (Get-Command $functionName -ErrorAction SilentlyContinue) {
@@ -261,8 +321,9 @@ class RequestObject {
             return
         }
 
+        # /category/folderindex/relativepath/virtualpath.known + context IS container 
         if ($this.RequestType -eq "Category" -and $this.IsContainer -and $this.ContextPageType -ne "" -and $this.VirtualPath -ne "") {
-            Write-Host "Category page with folder index and virtual path"
+            Write-Host "Pelegrina page with content of cointainer file on a virtual path"
             # This is a content page of container file
             $functionName = "Show-" + $this.ContextPageType + "Controller"
             if (Get-Command $functionName -ErrorAction SilentlyContinue) {
@@ -274,17 +335,14 @@ class RequestObject {
             return
         }
 
-        if ($this.RequestType -eq "Category" -and $this.IsContainer -eq $false) {
-            Write-Host "Category page with a file"
-            # this is an ordinary content page
-            $functionName = "Show-" + $this.ContextPageType + "Controller"
-            if (Get-Command $functionName -ErrorAction SilentlyContinue) {
-                Write-Host "function" $functionName
-                & $functionName $this
-            } else {
-                Write-Host "function not found" $functionName
-            }
+#!!!    # /category/folderindex/relativepath/virtualpath.unknown + context IS container 
+        if ($this.RequestType -eq "Category" -and $this.RelativePath -ne "" -and $this.VirtualPath -ne "" -and $this.IsContainer -and $this.ContextPageType -eq "") {
+            Write-Host "Pelegrina page with an unknown file in a container file - download the file"
+            # it should return the file
+            VirtualBinaryHandler $this
+            return
         }
+
 
         if ($this.RequestType -eq "Error") {
             Write-Host "404 page"
