@@ -35,16 +35,32 @@ function VirtualBinaryHandler($requestObject) {
         try {
             $zipFile = [System.IO.Compression.ZipFile]::OpenRead($requestObject.ContextPath)
             $entry = $zipFile.GetEntry($selectedFile)
-        
+            
             if ($entry -eq $null) {
                 throw "File '$selectedFile' not found in zip file."
             }
-        
+
+            $filename = $entry.Name
+            # $response.ContentType = [System.Web.MimeMapping]::GetMimeMapping($filename)
+            $response.ContentType = Get-MimeType $filename
+
+            # $stream = $entry.Open()
+            # $memoryStream = New-Object System.IO.MemoryStream
+            # $stream.CopyTo($memoryStream)
+            # $memoryStream.Position = 0
+            # $response.ResponseBytes = $memoryStream.ToArray()
+
             $stream = $entry.Open()
-            $reader = New-Object System.IO.StreamReader($stream)
-            $response.ResponseString = $reader.ReadToEnd()
+            $reader = New-Object System.IO.BinaryReader($stream)
+            $response.ResponseBytes = $reader.ReadBytes([int]$entry.Length)
         } finally {
-            $reader.Close()
+            if ($null -ne $memoryStream) {
+                $memoryStream.Close()
+            }
+
+            if ($null -ne $reader) {
+                $reader.Close()
+            }
             
             if ($null -ne $stream) {
                 $stream.Close()
@@ -55,12 +71,14 @@ function VirtualBinaryHandler($requestObject) {
             }
         }
     } else { 
+        $response.ResponseBytes = $Null
         $response.ResponseString = $Null
         $response.FilePath = $Null
         $response.HttpResponse.StatusCode = 404
         # $fullPath = Get-FilePath $requestObject -NotFound
     }
     
+    Write-Host bytes $response.ResponseBytes.Length
     $response.Respond()
     # "after response $fullpath" | Out-File -Append -FilePath "./log.txt"
 }
