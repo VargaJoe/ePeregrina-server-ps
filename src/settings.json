@@ -25,7 +25,8 @@
     "gif": "image",
     "cbz": "cbz",
     "zip": "cbz",
-    "epub": "book",
-    "txt": "text"
+    "epub": "epub",
+    "txt": "text",
+    "html": "html"    
   }
 }
