@@ -7,3 +7,13 @@ function Get-JsonFromBody {
         return $json
     }
 }
+
+function Show-Context {
+    Write-Host "controller" $($requestObject.Controller)
+    Write-Host "category" $($requestObject.Category)
+    Write-Host "index" $($requestObject.FolderIndex)
+    Write-Host "root" $($requestObject.FolderPath)
+    Write-Host "rel" $($requestObject.RelativePath)
+    Write-Host "virt" $($requestObject.VirtualPath)
+    Write-Host "abs" $($requestObject.ContextPath)
+}

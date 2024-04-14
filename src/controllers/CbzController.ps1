@@ -1,10 +1,6 @@
 function Show-CbzController($requestObject) {
-     $zipFile = [System.IO.Compression.ZipFile]::OpenRead($requestObject.ContextPath)
-     $zipFile.Entries | ForEach-Object {
-         $_.FullName
-         # $_.Name
-     }
-     $zipFile.Dispose()
+    Write-Host "cbz controller"
+    Show-Context
 
      # Create model
      $model = @{

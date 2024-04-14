@@ -1,8 +1,8 @@
 class CbzModelObject {
     [PSCustomObject]$model = @{}
-
+    
     CbzModelObject($requestObject) {
-        Write-Host "CBZ MODEL"
+        Write-Host "CBZ MODEL - Image from zip file"
         $selectedImage = $requestObject.VirtualPath.TrimStart('/')
         $imgObj = $this.GetImageDataWithPagerFromZip($requestObject.ContextPath, $selectedImage)
         $currentIndex = $this.GetPagerIndex($selectedImage, $imgObj.ToC)
