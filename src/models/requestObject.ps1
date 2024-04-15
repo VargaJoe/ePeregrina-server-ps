@@ -75,21 +75,10 @@ class RequestObject {
         $this.Action = ""
         $this.IsResource = ""
 
-        Write-Host 
-        Write-Host 
-        Write-Host $this.RequestUrl
+        Write-Host "`n`nurl" $this.RequestUrl
         Write-Host "referrer" $this.HttpRequest.Headers["Referer"]
         Write-Host "accept" $this.HttpRequest.Headers["Accept"]
         Write-Host "user agent" $this.HttpRequest.UserAgent
-
-        # if ($null -eq $this.HttpRequest.Headers["Referer"] -or $this.HttpRequest.Headers["Referer"] -notmatch "^https?://(www\.)?yourwebsite\.com") {
-        # if ($null -eq $this.HttpRequest.Headers["Referer"] -or $this.HttpRequest.Headers["Referer"] -notmatch "^https?://(www\.)?localhost:8888") {
-        #     Write-Host "User likely navigated to URL $($this.HttpRequest.Url) directly"
-        # } elseif ($this.HttpRequest.Headers["Accept"] -match "image/*") {
-        #     Write-Host "Request for URL $($this.HttpRequest.Url) likely came from an image tag"
-        # } else {
-        #     Write-Host "Request for URL $($this.HttpRequest.Url) came from $($this.HttpRequest.Headers["Referer"])"
-        # }
 
         # webroot should be global from start script
         $webRootPath = ($this.Settings.webFolder) -replace "../", "/" -replace "./", "/" -replace "//", "/"
@@ -108,7 +97,6 @@ class RequestObject {
             Write-Host "Index page"
             $this.RequestType = "Index"
             $this.Controller = "Index"
-            # Write-Host "RequestType" $this.RequestType
             return
         }
 
@@ -120,7 +108,6 @@ class RequestObject {
             $this.Controller = "File"
             $this.Action = "Stream"
             $this.ContextPath = Resolve-Path -LiteralPath $testFilePath
-            # Write-Host "RequestType" $this.RequestType
             return
         }
 
@@ -132,14 +119,12 @@ class RequestObject {
             Write-Host "Controller page"
             $this.ControllerFunction = $functionName
             $this.RequestType = "Controller"
-            # Write-Host "RequestType" $this.RequestType
-            # return # no return as controller may need calculated paths
+            return 
         }
 
         # Category page
         $this.Category = $this.Paths[1]
         $this.RequestType = "Category"
-        
         if ($this.Paths.Count -lt 3) {
             Write-Host "Category page with no folder index"
             return
@@ -177,13 +162,6 @@ class RequestObject {
             $ufilter = ($this.Settings.containerFilter) -join "|"
             $efilter = ($this.Settings.containerFilter | ForEach-Object { [regex]::Escape($_) }) -join "|"
             if ($this.RelativePath -match ".($ufilter)") {
-                Write-Host "MATCH!!!" $ufilter $this.RelativePath
-                
-                # $parts = $this.RelativePath -split "$ufilter"
-                # Write-Host "p1" "["$parts"]"
-                # $parts = $this.RelativePath -replace ".*$ufilter", ""
-                # Write-Host "p1" "["$parts"]"
-
                 $parts = ""
                 $index = 0
                 $match = [Regex]::Match($this.RelativePath, $ufilter)
@@ -194,12 +172,6 @@ class RequestObject {
                 $this.RelativePath = $this.RelativePath.Substring(0, $index)
                 $this.ReducedLocalPath = $this.LocalPath.Substring(0, $this.LocalPath.Length - $this.VirtualPath.Length)
                 
-                Write-Host $this.VirtualPath
-                
-                # Assign the parts to $this.RelativePath and $this.VirtualPath
-                # $this.RelativePath = $parts[0] 
-                # $this.VirtualPath = $parts[1]
-
                 # it is a container file
                 $this.IsContainer = $true
                 $this.IsFile = $true
@@ -210,13 +182,9 @@ class RequestObject {
 
         $testFilePath = Join-Path -Path $this.FolderPath -ChildPath $this.RelativePath        
         if (Test-Path -LiteralPath $testFilePath) {
-            write-host "!!! $testFilePath exists !!!"
             $this.ContextPath = Resolve-Path -LiteralPath $testFilePath
             
             if ((Test-Path -LiteralPath $this.ContextPath -PathType Leaf)) {
-                Write-Host "File!!!"
-                # $this.Action = "View"
-
                 # Get the file extension from ContextPath so the addressed file can be opened
                 $this.ContextFileType = [System.IO.Path]::GetExtension($this.ContextPath).TrimStart(".")
                 $this.ContextModelType = $this.Settings.FileTypes.($this.ContextFileType)
@@ -235,8 +203,6 @@ class RequestObject {
             } else {
                 Write-Host "Folder!!!"
                 $this.IsContainer = $true
-                # $this.IsFile = $false
-                # $this.Action = "List"
             }
         } else {
             write-host "!!! $testFilePath not exists !!!"
@@ -282,16 +248,15 @@ class RequestObject {
 
         # /category
         if ($this.RequestType -eq "Category" -and $this.folderindex -eq -1) {
-            Write-Host "Pelegrina page main level - show shared categories"
+            Write-Host "Pelegrina page main level - category list"
             # This is a Pelegrina page on main level
             Show-CategoryIndexController $this
             return
         }
 
-
         # /category/folderindex
         if ($this.RequestType -eq "Category" -and $this.folderindex -gt -1 -and $this.RelativePath -eq "") {
-            Write-Host "Pelegrina page main level - show shared categories"
+            Write-Host "Pelegrina page main level - shared folders list on folder index"
             # This is a Pelegrina page on main level
             Show-CategoryFolderController $this
             return

@@ -2,14 +2,6 @@ function Show-TextController($requestObject) {
     Write-Host "text controller"
     Show-Context
 
-    # Write-Host "1 $($requestObject.Controller)"
-    # Write-Host "2 $($requestObject.Category)"
-    # Write-Host "index $($requestObject.FolderIndex)"
-    # Write-Host "root $($requestObject.FolderPath)"
-    # Write-Host "rel $($requestObject.RelativePath)"
-    # Write-Host "6 $($requestObject.VirtualPath)"
-    # Write-Host "abs $($requestObject.ContextPath)"
-
     # Create model
     $model = @{
         category = "text"
