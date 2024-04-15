@@ -59,7 +59,7 @@ class RequestObject {
         $this.Controller = ""
         $this.ControllerFunction = ""
         $this.Category = ""
-        $this.FolderIndex = 0
+        $this.FolderIndex = -1
         $this.FolderPath = ""
         $this.FolderPathResolved = ""
         $this.RelativePath = ""
@@ -140,11 +140,12 @@ class RequestObject {
         $this.Category = $this.Paths[1]
         $this.RequestType = "Category"
         
-        # if ($this.Paths.Count -lt 3) {
-        #     Write-Host "Category page with no folder index"
-        # }
+        if ($this.Paths.Count -lt 3) {
+            Write-Host "Category page with no folder index"
+            return
+        }
 
-        $this.FolderIndex = $this.Paths[2] ?? 0
+        $this.FolderIndex = $this.Paths[2] 
         $fIndex = $this.FolderIndex
         $folderSetting = $this.Settings."$($this.Category)Paths"
         $relativeIndex = 2
@@ -280,11 +281,19 @@ class RequestObject {
         # /category/folderindex/relativepath/virtualpath
 
         # /category
-        # /category/folderindex
-        if ($this.RequestType -eq "Category" -and $this.RelativePath -eq "") {
+        if ($this.RequestType -eq "Category" -and $this.folderindex -eq -1) {
             Write-Host "Pelegrina page main level - show shared categories"
             # This is a Pelegrina page on main level
-            Show-CategoryController $this
+            Show-CategoryIndexController $this
+            return
+        }
+
+
+        # /category/folderindex
+        if ($this.RequestType -eq "Category" -and $this.folderindex -gt -1 -and $this.RelativePath -eq "") {
+            Write-Host "Pelegrina page main level - show shared categories"
+            # This is a Pelegrina page on main level
+            Show-CategoryFolderController $this
             return
         }
 
@@ -313,7 +322,7 @@ class RequestObject {
         if ($this.RequestType -eq "Category" -and $this.RelativePath -ne "" -and $this.IsContainer -and $this.ContextPageType -eq "" -and $this.isfile -eq $false) {
             Write-Host "Pelegrina page with a folder - show list of contents"
             # if folder it should return the list of files            
-            Show-CategoryController $this
+            Show-CategoryFolderController $this
             return
         }
 
