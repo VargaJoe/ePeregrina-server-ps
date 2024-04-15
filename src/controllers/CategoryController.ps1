@@ -6,7 +6,7 @@ function Show-CategoryController($requestObject) {
     # Create model
     $model = @{
         category = "books"
-        items = Get-ChildItem -Path $requestObject.ContextPath | ForEach-Object {
+        items = Get-ChildItem -LiteralPath $requestObject.ContextPath | ForEach-Object {
             # $relUrlPath = "/" + $requestObject.Paths[1] + "/" + $folderIndex + $_.FullName.Replace($rootPath, "").Replace("\", "/")
             # $relUrlPath = $requestObject.RelativePath + "/" + $_.FullName.Replace($requestObject.FolderPath, "").Replace("\", "/")
             $relUrlPath = "/" + $requestObject.Category + "/" + $requestObject.FolderIndex + $_.FullName.Replace($requestObject.FolderPathResolved, "").Replace("\", "/")

@@ -27,7 +27,7 @@ class ImageModelObject {
 
         $containerPath = [System.IO.Path]::GetDirectoryName($ImagePath)
         $imageName = [System.IO.Path]::GetFileName($imagePath)
-        $pagerItems = Get-ChildItem -Path $containerPath | ForEach-Object {
+        $pagerItems = Get-ChildItem -LiteralPath $containerPath | ForEach-Object {
             $relUrlPath = $relativeContainerPath + "/" + "$($_.Name)"
             
             New-Object PSObject -Property @{

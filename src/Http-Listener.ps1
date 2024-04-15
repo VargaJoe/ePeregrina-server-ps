@@ -3,16 +3,16 @@
 # netsh http delete sslcert ipport=0.0.0.0:443 
 
 # Load helper functions from the Utils folder
-Get-ChildItem -Path ./models -Filter *.ps1 | ForEach-Object {
+Get-ChildItem -LiteralPath ./models -Filter *.ps1 | ForEach-Object {
     . $_.FullName
 }
 
-Get-ChildItem -Path ./utils -Filter *.ps1 | ForEach-Object {
+Get-ChildItem -LiteralPath ./utils -Filter *.ps1 | ForEach-Object {
     . $_.FullName
 }
 
 # Load controllers from the Controllers folder
-Get-ChildItem -Path ./controllers -Filter *.ps1 | ForEach-Object {
+Get-ChildItem -LiteralPath ./controllers -Filter *.ps1 | ForEach-Object {
     . $_.FullName
 }
 

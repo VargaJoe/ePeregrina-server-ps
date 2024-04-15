@@ -10,7 +10,7 @@ function BinaryHandler($requestObject) {
     $response.ResponseType = "binary"
     # if (Test-Path $fullPath) { 
         $response.ResponseString = $Null
-        $response.FilePath = Resolve-Path $fullPath
+        $response.FilePath = Resolve-Path -LiteralPath $fullPath
     # } else { 
     #     $response.ResponseString = $Null
     #     $response.FilePath = $Null
