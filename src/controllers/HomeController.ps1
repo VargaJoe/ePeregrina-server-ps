@@ -2,10 +2,23 @@ function Show-HomeController($requestObject) {
     Write-Host "home controller"
     Show-Context
 
-    # Write-Output "1 $($requestObject.Settings.theme)"
-    # Write-Output "3 $($requestObject.Settings.WebFolder)"
-    # Write-Output "4 $($requestObject.Settings.comicsPaths[0].pathString)"
-    # Write-Output "5 $($requestObject.Settings.booksPaths[0].pathString)"
-    
-    Show-View $requestObject "index"
+    $odd = $true
+    $model = @{
+        category = "index"
+        items = $requestObject.Settings.PSObject.Properties | Where-Object { $_.Value -is [Object[]] -and $_.Value[0].pathString -ne $null } | ForEach-Object {
+            New-Object PSObject -Property @{
+                name = $_.Name -replace "Paths", ""
+                color =  $odd ? "orange" : "blue"
+                url = "/" + $_.Name -replace "Paths", ""
+                sharedPaths = $_.Value | ForEach-Object {
+                    New-Object PSObject -Property @{
+                        path = $_.pathString
+                    }
+                }
+            }
+            $odd = -not $odd
+        }
+    }
+
+    Show-View $requestObject "index" $model
 }

@@ -17,8 +17,11 @@
         </header>
 
         <div class="content">
-            <a href="/comics" id="orange" class="rootlink">Comics</a>
-            <a href="/books" id="blue" class="rootlink">Books</a>
+            <%
+            foreach ($item in $model.items) {
+                "<a href='$($item.url)' id='$($item.color)' class=`"rootlink`">$($item.name)</a>"
+            }
+            %>
             <br/>
         </div>
         <br/>
