@@ -1,5 +1,5 @@
-function Show-ImageController($requestObject) {
-    Write-Host "image controller"
+function Show-HtmlController($requestObject) {
+    Write-Host "html controller"
     Show-Context
 
     $typeName = $this.ContextModelType + "ModelObject"
@@ -8,5 +8,5 @@ function Show-ImageController($requestObject) {
         $pageModel = New-Object -TypeName $typeName -ArgumentList $requestObject
     }
 
-    Show-View $requestObject "image" $pageModel.model
+    Show-View $requestObject "html" $pageModel.model
 }

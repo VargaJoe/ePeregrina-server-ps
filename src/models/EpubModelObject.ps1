@@ -1,22 +1,22 @@
-class CbzModelObject {
+class EpubModelObject {
     [PSCustomObject]$model = @{}
     
-    CbzModelObject($requestObject) {
-        Write-Host "CBZ MODEL - Image from zip file"
-        $selectedImage = $requestObject.VirtualPath.TrimStart('/')
-        $imgObj = $this.GetImageDataWithPagerFromZip($requestObject.ContextPath, $selectedImage)
-        $currentIndex = $this.GetPagerIndex($selectedImage, $imgObj.ToC)
+    EpubModelObject($requestObject) {
+        Write-Host "HTML MODEL - Html from zip file"
+        $selectedPage = $requestObject.VirtualPath.TrimStart('/')
+        $htmlObj = $this.GetImageDataWithPagerFromZip($requestObject.ContextPath, $selectedPage)
+        $currentIndex = $this.GetPagerIndex($selectedPage, $htmlObj.ToC)
         $prevIndex = $currentIndex - 1
         $nextIndex = $currentIndex + 1
         $this.model = @{
             type = "image"
             pager = @{
-                prev = $prevIndex -ge 0 ? $imgObj.ToC[$prevIndex] : $null
-                next = $nextIndex -lt $imgObj.ToC.Count ? $imgObj.ToC[$nextIndex] : $null
+                prev = $prevIndex -ge 0 ? $htmlObj.ToC[$prevIndex] : $null
+                next = $nextIndex -lt $htmlObj.ToC.Count ? $htmlObj.ToC[$nextIndex] : $null
             }
-            image = @{
-                Name = $selectedImage
-                Data = $imgObj.Data
+            htmlFile = @{
+                Name = $selectedPage
+                Data = $htmlObj.Data -replace "<(/?)(html|body|head)>", "<`$1div>"
             }
         }    
     }
@@ -36,11 +36,10 @@ class CbzModelObject {
     
     [PSCustomObject]GetImageDataWithPagerFromZip([string]$ZipFilePath, [string]$ImageName) {
         $zipObj = $this.GetZipFileContentWithPager($ZipFilePath, $ImageName)
-        $imageContent = [System.Convert]::ToBase64String($zipObj.bytes)
         $imageModel = [PSCustomObject]@{
             Name = $ImageName
             ToC  = $zipObj.toc
-            Data = $imageContent
+            Data = $zipObj.data
         }
     
         return $imageModel
@@ -48,7 +47,7 @@ class CbzModelObject {
 
     [PSCustomObject]GetZipFileContentWithPager([string]$ZipFilePath,[string]$FileName) {
         $zipFile = [System.IO.Compression.ZipFile]::OpenRead($ZipFilePath)
-        $toc = $zipFile.Entries | Where-Object { $_.FullName -notlike "__MACOSX*" -and $_.FullName -notlike "*/" } | ForEach-Object {
+        $toc = $zipFile.Entries | Where-Object { $_.FullName -notlike "__MACOSX*" -and $_.FullName -notlike "*/" } | Sort-Object FullName | ForEach-Object {
             $relUrlPath = $requestObject.ReducedLocalPath + "/" + "$($_.FullName)"
             
             # Create a custom object
@@ -59,29 +58,26 @@ class CbzModelObject {
         }   
         
         $entry = $zipFile.GetEntry($FileName)
-    
+
         if ($null -eq $entry) {
             Write-Host "File '$FileName' not found in the zip archive."
             return @{ 
                 toc = $toc
-                bytes = $null
+                data = $null
             }
         }
-    
+
         $stream = $entry.Open()
-        $memoryStream = New-Object System.IO.MemoryStream
-        $stream.CopyTo($memoryStream)
-    
-        $memoryStream.Position = 0
-        $bytes = $memoryStream.ToArray()
-    
+        $reader = New-Object System.IO.StreamReader($stream)
+        $fileContent = $reader.ReadToEnd()
+
+        $reader.Close()
         $stream.Close()
-        $memoryStream.Close()
         $zipFile.Dispose()
-    
-        return @{ 
+
+        return @{
             toc = $toc
-            bytes = $bytes
+            data = $fileContent
         }
     }
 }
