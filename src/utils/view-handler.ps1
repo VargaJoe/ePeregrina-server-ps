@@ -12,7 +12,7 @@ function Show-View {
     $response.ResponseType = "html"
 
     # Read the HTML content from the file
-    $viewTemplate = (Get-Content -Path "./views/$viewName.pshtml" -Raw) #-Replace '"', '&quot;'
+    $viewTemplate = (Get-Content -LiteralPath "./views/$viewName.pshtml" -Raw) #-Replace '"', '&quot;'
     # $evaluatedView = (Invoke-Expression "`"$viewTemplate`"") -Replace '&quot;', '"'    
 
     # Define a regular expression pattern to match PowerShell snippets within $( ... )

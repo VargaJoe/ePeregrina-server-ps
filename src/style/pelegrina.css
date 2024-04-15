@@ -221,6 +221,7 @@ header .searchinput {
   background-color: rgba(0, 0, 0, .45);
   word-wrap: break-word;
   overflow-wrap: break-word;
+  word-break: break-word; 
 }
 
 .content>a:actve,
