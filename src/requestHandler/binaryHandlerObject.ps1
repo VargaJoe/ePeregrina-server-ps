@@ -1,8 +1,13 @@
 class BinaryHandler {
-    [ResponseObject]$response
+    [PSCustomObject]$response
     
     BinaryHandler($requestObject) {
-        $this.response = [ResponseObject]::new($requestObject.HttpContext.Response)
+        $typeName = "ResponseObject"
+        if ([System.Management.Automation.PSTypeName]$typeName) {
+            $this.response = New-Object -TypeName $typeName -ArgumentList $requestObject.HttpContext.Response
+        }
+
+        # $this.response = [ResponseObject]::new($requestObject.HttpContext.Response)
         $this.response.ResponseType = "binary"
     }
 
