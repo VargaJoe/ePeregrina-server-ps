@@ -33,7 +33,7 @@ class BinaryHandler {
                 $zipFile = [System.IO.Compression.ZipFile]::OpenRead($requestObject.ContextPath)
                 $entry = $zipFile.GetEntry($selectedFile)
                 
-                if ($entry -eq $null) {
+                if ($null -eq $entry) {
                     throw "File '$selectedFile' not found in zip file."
                 }
     
