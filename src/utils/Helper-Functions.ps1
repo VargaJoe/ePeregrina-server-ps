@@ -47,3 +47,22 @@ function Get-MimeType {
     }
 }
 
+function BinaryHandler($requestObject) {
+    $binary = [BinaryHandler]::new($this)
+    $binary.GetPhysicalFile($requestObject)
+}
+
+function VirtualBinaryHandler($requestObject) {
+    $binary = [BinaryHandler]::new($this)
+    $binary.GetVirtualFile($this)
+}
+
+function PageHandler($requestObject) {
+    $typeName = $this.ContextModelType + $this.VirtualModelType + "ModelObject"
+    Write-Host "type $typeName"
+    if ([System.Management.Automation.PSTypeName]$typeName) {
+        $pageModel = New-Object -TypeName $typeName -ArgumentList $requestObject
+    }
+    $pageTemplate = ($this.VirtualModelType) ? $this.VirtualModelType : $this.ContextModelType
+    Show-View $requestObject $pageTemplate $pageModel.model
+}

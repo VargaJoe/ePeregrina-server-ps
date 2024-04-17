@@ -8,7 +8,7 @@ function Show-View {
         [Object]$model
     )
     "new response $viewName" | Out-File -Append -FilePath "./log.txt"
-    $response = [ResponseObject]::new($requestObject.HttpContext.Response)    
+    $response = [ResponseObject]::new($requestObject.HttpContext.Response)
     $response.ResponseType = "html"
 
     # Read the HTML content from the file
