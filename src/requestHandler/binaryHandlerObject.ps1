@@ -7,7 +7,6 @@ class BinaryHandler {
             $this.response = New-Object -TypeName $typeName -ArgumentList $requestObject.HttpContext.Response
         }
 
-        # $this.response = [ResponseObject]::new($requestObject.HttpContext.Response)
         $this.response.ResponseType = "binary"
     }
 
@@ -39,7 +38,8 @@ class BinaryHandler {
                 $entry = $zipFile.GetEntry($selectedFile)
                 
                 if ($null -eq $entry) {
-                    throw "File '$selectedFile' not found in zip file."
+                    Write-Host "File '$selectedFile' not found in zip file."
+                    return
                 }
     
                 $filename = $entry.Name

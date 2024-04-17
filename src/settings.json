@@ -28,6 +28,30 @@
     "epub": "epub",
     "txt": "text",
     "html": "html",
+    "pdf": "pdf"
+  },
+  "FileTypeMapper": {
+    "jpeg": "image",
+    "jpg": "image",
+    "png": "image",
+    "gif": "image",
+    "cbz": "cbz",
+    "zip": "cbz",
+    "epub": "epub",
+    "txt": "text",
+    "html": "html",
+    "pdf": "pdf"    
+  },
+  "ContextTypeMapper": {
+    "jpeg": "image",
+    "jpg": "image",
+    "png": "image",
+    "gif": "image",
+    "cbz": "cbz",
+    "zip": "cbz",
+    "epub": "epub",
+    "txt": "text",
+    "html": "html",
     "pdf": "pdf"    
   }
 }

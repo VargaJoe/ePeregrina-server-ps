@@ -15,6 +15,12 @@ class ResponseObject {
 
     [void] Respond() {
         $ResponseBuffer = @()
+
+        if ($Global:responseClosed) {
+            Write-Host "Response is already closed."
+            return
+        }
+
         if ($this.ContentType -eq "" -or $null -eq $this.ContentType) {
             switch ($this.ResponseType) {
                 "json" {
@@ -59,7 +65,8 @@ class ResponseObject {
         } finally {
             # $this.HttpResponse.OutputStream?.Flush()
             $this.HttpResponse.Close()
-            "close response" | Out-File -Append -FilePath "./log.txt"
+            # "close response" | Out-File -Append -FilePath "./log.txt"
+            $Global:responseClosed = $true
         }
     }
 }

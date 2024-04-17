@@ -26,20 +26,12 @@ class EpubModelObject {
     
         # Find the navigation file
         $navEntry = $zipArchive.Entries | Where-Object { $_.Name -match "toc.ncx|nav.xhtml" } | Select-Object -First 1
- 
-        # if (-not $navEntry) {
-        #     Write-Host "Navigation file (toc.ncx or nav.xhtml) not found in EPUB."
-        #     return ,@(New-Object -TypeName PSObject -Property @{
-        #         Name = "Navigation file (toc.ncx or nav.xhtml) not found in EPUB."
-        #         Url = $null
-        #     })
-        # }
     
         # Read the navigation file content
         $navStream = $navEntry.Open()
         $navReader = [System.IO.StreamReader]::new($navStream)
         $navContent = $navReader.ReadToEnd()
-     
+
         # Close streams
         $navReader.Close()
         $navStream.Close()
@@ -55,12 +47,11 @@ class EpubModelObject {
                 Url = $url
             }
         }
-     
+
         # Dispose of the ZipArchive and MemoryStream
         $zipArchive.Dispose()
         $zipStream.Dispose()
     
         return $tocItems
     }
-    
 }

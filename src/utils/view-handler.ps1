@@ -1,14 +1,16 @@
 function Show-View {
     param(
+        # [parameter(Mandatory = $true)]
+        # [PelegrinaRequestObject]$requestObject,
         [parameter(Mandatory = $true)]
-        [RequestObject]$requestObject,
+        [ResponseObject]$response,
         [parameter(Mandatory = $true)]
         [string]$viewName,
         [parameter(Mandatory = $false)]
         [Object]$model
     )
-    "new response $viewName" | Out-File -Append -FilePath "./log.txt"
-    $response = [ResponseObject]::new($requestObject.HttpContext.Response)
+    # "new response $viewName" | Out-File -Append -FilePath "./log.txt"
+    # $response = [ResponseObject]::new($requestObject.HttpContext.Response)
     $response.ResponseType = "html"
 
     # Read the HTML content from the file
@@ -18,13 +20,6 @@ function Show-View {
     # Define a regular expression pattern to match PowerShell snippets within $( ... )
     $pattern = '<%\s*([\s\S]*?)\s*%>'
 
-    
-    # $result = foreach ($item in $model) {
-    #     $fileNameWithoutPath = $item.BaseName
-    #     "<br/><br/><br/>" +
-    #     "<a href='/comics/1/' class='rootlink'>$fileNameWithoutPath</a>"
-    # }
-    # write-host $result
     # Use a regular expression match evaluator to evaluate PowerShell snippets
     # Create a regex object
     $regex = [regex]::new($pattern)
@@ -54,19 +49,9 @@ function Show-View {
         $evaluatedSnippet = $evaluatedSnippets[$index]  # Use the match index to get the evaluated snippet
         return $evaluatedSnippet
     })
-   
-
-    # $evaluatedView = [regex]::Replace($viewTemplate, $pattern, {
-    #     param($match)
-    #     # Evaluate the PowerShell snippet
-    #     $result = Invoke-Expression $match.Groups[1].Value
-    #     # Return the evaluated result
-    #     return $result
-    # })
-    write-host done
 
     # Evaluated HTML content goes to response
     $response.ResponseString = $evaluatedView
     $response.Respond()
-    "after response $viewName" | Out-File -Append -FilePath "./log.txt"
+    write-host done
 }
