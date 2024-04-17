@@ -31,6 +31,8 @@ class StaticRequestObject {
         $settingsFilePath = "./settings.json"
         $this.Settings = Get-Content $settingsFilePath | ConvertFrom-Json
 
+        $this.RequestType = ""
+
         Write-Host "url" $this.RequestUrl
         Write-Host "referrer" $this.HttpRequest.Headers["Referer"]
         Write-Host "accept" $this.HttpRequest.Headers["Accept"]
@@ -51,7 +53,7 @@ class StaticRequestObject {
         $testFilePath = Join-Path -Path $webRootPath.Path -ChildPath $this.LocalPath
         if (Test-Path -LiteralPath $testFilePath -PathType Leaf) {
             # File page
-            Write-Host "File resource"
+            Write-Host "File resource" $testFilePath
             $this.RequestType = "File"
             # $this.Controller = "File"
             # $this.Action = "Stream"

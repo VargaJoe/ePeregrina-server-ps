@@ -3,7 +3,9 @@ class epubHtmlModelObject {
     
     epubHtmlModelObject($requestObject) {
         Write-Host "HTML MODEL - Html from zip file"
-        $selectedPage = $requestObject.VirtualPath.TrimStart('/')
+        Write-Host "1" $requestObject.HttpRequest.RawUrl
+        Write-Host "2" $requestObject.HttpRequest.Url
+        $selectedPage = $requestObject.VirtualPath.TrimStart('/') 
         $htmlObj = $this.GetImageDataWithPagerFromZip($requestObject.ContextPath, $selectedPage)
         if ($null -eq $htmlObj.Data) {
             $this.model = @{
@@ -12,9 +14,8 @@ class epubHtmlModelObject {
             }
             return
         }
-
-
-        $currentIndex = $this.GetPagerIndex($selectedPage, $htmlObj.ToC)
+        Write-Host "A1" $selectedPage
+        $currentIndex = $this.GetPagerIndex($selectedPage, $requestObject.HttpRequest.QueryString["hash"], $htmlObj.ToC)
         $prevIndex = $currentIndex - 1
         $nextIndex = $currentIndex + 1
         $this.model = @{
@@ -30,12 +31,16 @@ class epubHtmlModelObject {
         }    
     }
 
-    [PSCustomObject]GetPagerIndex([string]$imageName, [object[]]$pagerItems) {
+    [PSCustomObject]GetPagerIndex([string]$fileName, [string]$hash, [object[]]$pagerItems) {
+        $itemSrc = $fileName
         $currentPageIndex = -1
-
+        if ($hash) {
+            $itemSrc = $itemSrc + $hash
+        }
+        Write-Host "A2" $itemSrc
         foreach ($item in $pagerItems) {
             $currentPageIndex = $currentPageIndex + 1
-            if ($item.Name -eq $ImageName) {
+            if ($item.ExtendedName -eq $itemSrc) {
                 break
             } 
         }
@@ -56,15 +61,45 @@ class epubHtmlModelObject {
 
     [PSCustomObject]GetZipFileContentWithPager([string]$ZipFilePath,[string]$FileName) {
         $zipFile = [System.IO.Compression.ZipFile]::OpenRead($ZipFilePath)
-        $toc = $zipFile.Entries | Where-Object { $_.FullName -notlike "__MACOSX*" -and $_.FullName -notlike "*/" } | Sort-Object FullName | ForEach-Object {
-            $relUrlPath = $requestObject.ReducedLocalPath + "/" + "$($_.FullName)"
-            
-            # Create a custom object
-            New-Object PSObject -Property @{
-                Name = $_.FullName 
-                Url  = $relUrlPath
+
+        # Stat of ToC
+        $navEntry = $zipFile.Entries | Where-Object { $_.Name -match "toc.ncx|nav.xhtml" } | Select-Object -First 1
+          
+        # Read the navigation file content
+        $navStream = $navEntry.Open()
+        $navReader = [System.IO.StreamReader]::new($navStream)
+        $navContent = $navReader.ReadToEnd()
+
+        # Close streams
+        $navReader.Close()
+        $navStream.Close()
+    
+        # Parse the navigation file to extract TOC
+        $namespace = @{ ncx = "http://www.daisy.org/z3986/2005/ncx/" }
+        $toc = $navContent | Select-Xml -XPath "//ncx:navPoint" -Namespace $namespace | ForEach-Object {
+            $navPoint = $_.Node
+            $name = $navPoint.navLabel.text
+            $src = $navPoint.content.src
+            $src2 = $src -replace "#", "?hash="
+            $relUrlPath = $requestObject.ReducedLocalPath + "/" + "$($src2)"
+            New-Object -TypeName PSObject -Property @{
+                Name = $name
+                ExtendedName = $src                
+                Url = $relUrlPath
             }
-        }   
+        }
+        # End of ToC
+
+        # # TODO: Get the table of contents from toc.nvx not from entries!!!
+        # $toc = $zipFile.Entries | Where-Object { $_.FullName -notlike "__MACOSX*" -and $_.FullName -notlike "*/" } | Where-Object { $_.FullName -match "\.(html|xhtml)$" } | Sort-Object FullName | ForEach-Object {
+        #     $relUrlPath = $requestObject.ReducedLocalPath + "/" + "$($_.FullName)"
+            
+        #     # Create a custom object
+        #     New-Object PSObject -Property @{
+        #         Name = $_.FullName 
+        #         Url  = $relUrlPath
+        #     }
+        # }   
         
         $entry = $zipFile.GetEntry($FileName)
 
