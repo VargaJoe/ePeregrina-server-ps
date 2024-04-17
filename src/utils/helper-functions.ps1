@@ -58,6 +58,7 @@ function VirtualBinaryHandler($requestObject) {
 }
 
 function PageHandler($requestObject) {
+    Show-Context
     $typeName = $this.ContextModelType + $this.VirtualModelType + "ModelObject"
     Write-Host "type $typeName"
     if ([System.Management.Automation.PSTypeName]$typeName) {

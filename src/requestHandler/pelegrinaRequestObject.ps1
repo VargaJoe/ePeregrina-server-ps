@@ -198,6 +198,7 @@ class PelegrinaRequestObject {
 
         # is there better way to distinguish resource request from content request?        
         if (($this.HttpRequest.Headers["Referer"] -match "\.html" -and $this.ContextFileType -ne "html" -and $this.VirtualFileType -ne "html") `
+        -or ($this.HttpRequest.Headers["Referer"] -match "\.xhtml" -and $this.ContextFileType -ne "xhtml" -and $this.VirtualFileType -ne "xhtml") `
         -or ($this.HttpRequest.Headers["Referer"] -match "\.pdf" -and $this.ContextFileType -eq "pdf")) {
             $this.IsResource = $true
         }
