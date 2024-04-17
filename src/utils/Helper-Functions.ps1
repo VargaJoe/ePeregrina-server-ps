@@ -63,6 +63,12 @@ function PageHandler($requestObject) {
     if ([System.Management.Automation.PSTypeName]$typeName) {
         $pageModel = New-Object -TypeName $typeName -ArgumentList $requestObject
     }
+    Write-Host "model type" $pageModel.type
+    if ($null -eq $pageModel -or $null -eq $pageModel.model -or $pageModel.model.type -eq "error") {
+        Write-Host "Model not found or error occured."
+        return
+    }
+
     $pageTemplate = ($this.VirtualModelType) ? $this.VirtualModelType : $this.ContextModelType
     # Show-View $requestObject $pageTemplate $pageModel.model
     $response = [ResponseObject]::new($requestObject.HttpContext.Response)

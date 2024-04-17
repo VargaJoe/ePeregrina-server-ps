@@ -57,8 +57,6 @@ class StaticRequestObject {
             # $this.Action = "Stream"
             $this.ContextPath = Resolve-Path -LiteralPath $testFilePath
             return
-        } else {
-            write-host "File not found: $testFilePath"
         }
     }
 

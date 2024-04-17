@@ -51,12 +51,6 @@ class PelegrinaRequestObject {
     }
 
     [void]Initialize([System.Net.HttpListenerContext]$context) { 
-        # skip if response disposed
-        if ($context.Response.IsClosed) {
-            # not working solution needed!
-            return
-        }        
-
         $this.HttpContext = $context
         $this.HttpRequest = $this.HttpContext.Request
         $this.RequestUrl = $this.HttpContext.Request.Url
@@ -95,18 +89,6 @@ class PelegrinaRequestObject {
         Write-Host "accept" $this.HttpRequest.Headers["Accept"]
         Write-Host "user agent" $this.HttpRequest.UserAgent
 
-        # webroot should be global from start script
-        # $webRootPath = ($this.Settings.webFolder) -replace "../", "/" -replace "./", "/" -replace "//", "/"
-        # if ($webRootPath.startswith("/")) {
-        #     $webRootPath = $Global:RootPath + $webRootPath
-        #     if (Test-Path -LiteralPath $webRootPath) {
-        #         $webRootPath = Resolve-Path -LiteralPath $webRootPath
-        #     } else {
-        #         write-host "webRootPath not found: $webRootPath"
-        #         exit
-        #     }
-        # }
-        
         if ($this.Paths.Count -lt 2 -or $this.Paths[1] -eq "") {
             # Index page
             Write-Host "Index page"
@@ -116,31 +98,18 @@ class PelegrinaRequestObject {
             return
         }
 
-        # $testFilePath = Join-Path -Path $webRootPath.Path -ChildPath $this.LocalPath
-        # if (Test-Path -LiteralPath $testFilePath -PathType Leaf) {
-        #     # File page
-        #     Write-Host "File resource"
-        #     $this.RequestType = "File"
-        #     $this.Controller = "File"
-        #     $this.Action = "Stream"
-        #     $this.ContextPath = Resolve-Path -LiteralPath $testFilePath
-        #     return
-        # }
-
-        # Check if controller exists in the format "Show-{Controller}"
-        # $this.Controller = $this.Paths[1]
-        # $functionName = "Show-" + $this.Controller + "Controller"
-        # if (Get-Command $functionName -ErrorAction SilentlyContinue) {
-        #     # Controller page
-        #     Write-Host "Controller page"
-        #     $this.ControllerFunction = $functionName
-        #     $this.RequestType = "Controller"
-        #     return 
-        # }
-
         # Category page
         $this.Category = $this.Paths[1]
         $this.RequestType = "Category"
+
+        $folderSetting = $this.Settings."$($this.Category)Paths"
+        if (-not $folderSetting) {
+            Write-Host "404 page - category not set"
+            $this.RequestType = "Error"
+            $this.ContextModelType = "Error404"
+            return
+        }
+
         if ($this.Paths.Count -lt 3) {
             Write-Host "Category page with no folder index"
             $this.ContextModelType = "categoryIndex"
@@ -149,7 +118,6 @@ class PelegrinaRequestObject {
 
         $this.FolderIndex = $this.Paths[2] 
         $fIndex = $this.FolderIndex
-        $folderSetting = $this.Settings."$($this.Category)Paths"
         $relativeIndex = 2
         if ($folderSetting -and $fIndex -ge 0 -and $fIndex -lt $folderSetting.Count) {
             $this.FolderPath = $folderSetting[$fIndex].pathString
@@ -165,6 +133,7 @@ class PelegrinaRequestObject {
             # Shared folder not exists
             Write-Host "404 page"
             $this.RequestType = "Error"
+            $this.ContextModelType = "Error404"
             Write-Host "RequestType" $this.RequestType
             return
         }
@@ -264,8 +233,6 @@ class PelegrinaRequestObject {
         if ($this.RequestType -eq "Category" -and $this.folderindex -gt -1 -and $this.RelativePath -eq "") {
             Write-Host "Pelegrina page main level - shared folders list on folder index"
             # This is a Pelegrina page on main level
-            # Show-CategoryFolderController $this
-
             PageHandler($this)
             return
         }
@@ -274,15 +241,6 @@ class PelegrinaRequestObject {
         if ($this.RequestType -eq "Category" -and $this.IsContainer -eq $false -and $this.ContextPageType -ne "" -and -not $this.IsResource) {
             Write-Host "Pelegrina page with a mapped file"
             # this is an ordinary content page
-            
-            # $functionName = "Show-" + $this.ContextPageType + "Controller"
-            # if (Get-Command $functionName -ErrorAction SilentlyContinue) {
-            #     Write-Host "function" $functionName
-            #     & $functionName $this
-            # } else {
-            #     Write-Host "function not found" $functionName            
-            # }
-
             PageHandler($this)
             return
         }
@@ -298,8 +256,6 @@ class PelegrinaRequestObject {
         if ($this.RequestType -eq "Category" -and $this.RelativePath -ne "" -and $this.IsContainer -and $this.ContextPageType -eq "" -and $this.isfile -eq $false) {
             Write-Host "Pelegrina page with a folder - show list of contents"
             # if folder it should return the list of files            
-            # Show-CategoryFolderController $this
-
             PageHandler($this)
             return
         }
@@ -313,7 +269,7 @@ class PelegrinaRequestObject {
         }
 
 #!!!    # /category/folderindex/relativepath.unknown + context IS NOT container
-        if ($this.RequestType -eq "Category" -and $this.RelativePath -ne "" -and $this.IsContainer -eq $false -and $this.ContextPageType -eq "") {
+        if ($this.RequestType -eq "Category" -and $this.RelativePath -ne "" -and $this.IsContainer -eq $false -and $this.ContextPageType -eq "" -and $this.IsFile) {
             Write-Host "Pelegrina page with an unknown file - download the file"
             # it should return the file
             BinaryHandler $this
@@ -326,15 +282,6 @@ class PelegrinaRequestObject {
         if ($this.RequestType -eq "Category" -and $this.RelativePath -ne "" -and $this.IsContainer -and $this.ContextPageType -ne "" -and $this.VirtualPath -eq "") {
             Write-Host "Pelegrina page with list of container file"
             # This is a list page of container file
-            
-            # $functionName = "Show-" + $this.ContextPageType + "Controller"
-            # if (Get-Command $functionName -ErrorAction SilentlyContinue) {
-            #     Write-Host "function" $functionName
-            #     & $functionName $this
-            # } else {
-            #     Write-Host "function not found" $functionName
-            # }
-
             PageHandler($this)
             return
         }
@@ -343,15 +290,6 @@ class PelegrinaRequestObject {
         if ($this.RequestType -eq "Category" -and $this.IsContainer -and $this.ContextPageType -ne "" -and $this.VirtualPath -ne "" -and -not $this.IsResource) {
             Write-Host "Pelegrina page with content of cointainer file on a virtual path"
             # This is a content page of container file
-            
-            # $functionName = "Show-" + $this.ContextPageType + "Controller"
-            # if (Get-Command $functionName -ErrorAction SilentlyContinue) {
-            #     Write-Host "function" $functionName
-            #     & $functionName $this
-            # } else {
-            #     Write-Host "function not found" $functionName
-            # }
-
             PageHandler($this)
             return
         }
@@ -376,8 +314,7 @@ class PelegrinaRequestObject {
         if ($this.RequestType -eq "Error") {
             Write-Host "404 page"
             # Error page is handled by the ErrorController
-            # Show-ErrorController $this
-            BinaryHandler $this
+            PageHandler($this)
             return
         }
     }

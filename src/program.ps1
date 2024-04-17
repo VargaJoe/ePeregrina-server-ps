@@ -59,6 +59,12 @@ try {
 			$requestObject = [PelegrinaRequestObject]::new($context)
 			$requestObject.RouteRequest()
 		}
+
+		if (-not $Global:responseClosed) {
+			Write-Host "ErrorRequestObject"
+			$requestObject = [ErrorRequestObject]::new($context)
+			$requestObject.RouteRequest()
+		}
 	}
 }
 finally {

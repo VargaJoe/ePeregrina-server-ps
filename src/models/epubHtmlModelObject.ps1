@@ -5,6 +5,15 @@ class epubHtmlModelObject {
         Write-Host "HTML MODEL - Html from zip file"
         $selectedPage = $requestObject.VirtualPath.TrimStart('/')
         $htmlObj = $this.GetImageDataWithPagerFromZip($requestObject.ContextPath, $selectedPage)
+        if ($null -eq $htmlObj.Data) {
+            $this.model = @{
+                type = "error"
+                text = "404"
+            }
+            return
+        }
+
+
         $currentIndex = $this.GetPagerIndex($selectedPage, $htmlObj.ToC)
         $prevIndex = $currentIndex - 1
         $nextIndex = $currentIndex + 1

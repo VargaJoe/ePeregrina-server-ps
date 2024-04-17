@@ -5,6 +5,14 @@ class CbzImageModelObject {
         Write-Host "CBZ MODEL - Image from zip file"
         $selectedImage = $requestObject.VirtualPath.TrimStart('/')
         $imgObj = $this.GetImageDataWithPagerFromZip($requestObject.ContextPath, $selectedImage)
+        if ($null -eq $imgObj) {
+            $this.model = @{
+                type = "error"
+                text = "404"
+            }
+            return
+        }
+        
         $currentIndex = $this.GetPagerIndex($selectedImage, $imgObj.ToC)
         $prevIndex = $currentIndex - 1
         $nextIndex = $currentIndex + 1
@@ -36,6 +44,9 @@ class CbzImageModelObject {
     
     [PSCustomObject]GetImageDataWithPagerFromZip([string]$ZipFilePath, [string]$ImageName) {
         $zipObj = $this.GetZipFileContentWithPager($ZipFilePath, $ImageName)
+        if ($null -eq $zipObj.bytes) {
+            return $null
+        }
         $imageContent = [System.Convert]::ToBase64String($zipObj.bytes)
         $imageModel = [PSCustomObject]@{
             Name = $ImageName

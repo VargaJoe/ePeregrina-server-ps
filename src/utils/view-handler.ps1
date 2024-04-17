@@ -20,13 +20,6 @@ function Show-View {
     # Define a regular expression pattern to match PowerShell snippets within $( ... )
     $pattern = '<%\s*([\s\S]*?)\s*%>'
 
-    
-    # $result = foreach ($item in $model) {
-    #     $fileNameWithoutPath = $item.BaseName
-    #     "<br/><br/><br/>" +
-    #     "<a href='/comics/1/' class='rootlink'>$fileNameWithoutPath</a>"
-    # }
-    # write-host $result
     # Use a regular expression match evaluator to evaluate PowerShell snippets
     # Create a regex object
     $regex = [regex]::new($pattern)
@@ -56,19 +49,9 @@ function Show-View {
         $evaluatedSnippet = $evaluatedSnippets[$index]  # Use the match index to get the evaluated snippet
         return $evaluatedSnippet
     })
-   
-
-    # $evaluatedView = [regex]::Replace($viewTemplate, $pattern, {
-    #     param($match)
-    #     # Evaluate the PowerShell snippet
-    #     $result = Invoke-Expression $match.Groups[1].Value
-    #     # Return the evaluated result
-    #     return $result
-    # })
-    write-host done
 
     # Evaluated HTML content goes to response
     $response.ResponseString = $evaluatedView
     $response.Respond()
-    # "after response $viewName" | Out-File -Append -FilePath "./log.txt"
+    write-host done
 }

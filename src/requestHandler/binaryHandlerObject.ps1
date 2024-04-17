@@ -7,7 +7,6 @@ class BinaryHandler {
             $this.response = New-Object -TypeName $typeName -ArgumentList $requestObject.HttpContext.Response
         }
 
-        # $this.response = [ResponseObject]::new($requestObject.HttpContext.Response)
         $this.response.ResponseType = "binary"
     }
 
