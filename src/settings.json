@@ -28,6 +28,7 @@
     "epub": "epub",
     "txt": "text",
     "html": "html",
+    "xhtml": "html",
     "pdf": "pdf"
   },
   "FileTypeMapper": {

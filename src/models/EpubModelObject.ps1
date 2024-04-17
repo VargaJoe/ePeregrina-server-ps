@@ -5,7 +5,8 @@ class EpubModelObject {
         $this.model = @{
             category = "epub"
             items = $this.GetEpubTableOfContents($requestObject.ContextPath) | ForEach-Object {
-               $relUrlPath = $requestObject.LocalPath + "/" + "$($_.Url)"
+               $urlWithId = $_.Url -replace "#", "?id=$($_.Id)#"
+               $relUrlPath = $requestObject.LocalPath + "/" + $urlWithId
        
                # Create a custom object
                New-Object PSObject -Property @{
@@ -42,9 +43,11 @@ class EpubModelObject {
             $navPoint = $_.Node
             $name = $navPoint.navLabel.text
             $url = $navPoint.content.src
+            $id = $navPoint.id
             New-Object -TypeName PSObject -Property @{
                 Name = $name
                 Url = $url
+                Id = $id
             }
         }
 
