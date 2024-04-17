@@ -81,7 +81,7 @@ class epubHtmlModelObject {
             $name = $navPoint.navLabel.text
             $src = $navPoint.content.src
             $src2 = $src -replace "#", "?hash="
-            $relUrlPath = $requestObject.ReducedLocalPath + "/" + "$($src2)"
+            $relUrlPath = $requestObject.ReducedLocalPath + "/" + "$($src)"
             New-Object -TypeName PSObject -Property @{
                 Name = $name
                 ExtendedName = $src                
