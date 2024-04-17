@@ -106,7 +106,7 @@ class PelegrinaRequestObject {
         if (-not $folderSetting) {
             Write-Host "404 page - category not set"
             $this.RequestType = "Error"
-            $this.ContextModelType = "Error404"
+            $this.ContextModelType = "error404"
             return
         }
 
@@ -133,7 +133,7 @@ class PelegrinaRequestObject {
             # Shared folder not exists
             Write-Host "404 page"
             $this.RequestType = "Error"
-            $this.ContextModelType = "Error404"
+            $this.ContextModelType = "error404"
             Write-Host "RequestType" $this.RequestType
             return
         }

@@ -5,4 +5,5 @@ src/comics*
 src/books*
 src/!cleanup*
 src/log*.txt
+src/settings-docker.json
 src/magazine*
