@@ -1,6 +1,5 @@
 # load settings from settings.json
 $sourceSettings = Get-Content -Raw -Path settings.json | ConvertFrom-Json
-$dockerSettingsPath = Resolve-Path -LiteralPath "./settings-docker.json"
 $sharedPaths = @()
 
 $sfi = 0
@@ -18,6 +17,7 @@ foreach ($sharedPath in $sourceSettings.PSObject.Properties | Where-Object {$_.N
     }
 }
 $sourceSettings | ConvertTo-Json | Set-Content -Path settings-docker.json
+$dockerSettingsPath = Resolve-Path -LiteralPath "./settings-docker.json"
 
 foreach ($sharedPath in $sharedPaths) {
     Write-Host "Shared path: $sharedPath"    

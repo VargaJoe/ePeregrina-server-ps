@@ -31,7 +31,7 @@ class ErrorRequestObject {
 
         Write-Host "404 page - category not set"
         $this.RequestType = "Error"
-        $this.ContextModelType = "Error404"
+        $this.ContextModelType = "error404"
         return
     }
 
