@@ -64,5 +64,7 @@ function PageHandler($requestObject) {
         $pageModel = New-Object -TypeName $typeName -ArgumentList $requestObject
     }
     $pageTemplate = ($this.VirtualModelType) ? $this.VirtualModelType : $this.ContextModelType
-    Show-View $requestObject $pageTemplate $pageModel.model
+    # Show-View $requestObject $pageTemplate $pageModel.model
+    $response = [ResponseObject]::new($requestObject.HttpContext.Response)
+    Show-View $response $pageTemplate $pageModel.model
 }

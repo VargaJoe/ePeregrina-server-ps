@@ -22,6 +22,7 @@ Get-ChildItem -LiteralPath ./controllers -Filter *.ps1 | ForEach-Object {
 
 $Global:JsonResult = $null
 $Global:RootPath = $PSScriptRoot
+$Global:responseClosed = $true
 
 "new listener" | Out-File -Append -FilePath "./log.txt"
 $HttpListener = New-Object System.Net.HttpListener
@@ -36,19 +37,28 @@ try {
 		if ([System.Console]::KeyAvailable -and [System.Console]::ReadKey($true).Key -eq 'Escape') {
 			break
 		}
-
+		$Global:responseClosed = $false
+		Write-Host "`n`n"
+		$context = $HttpListener.GetContext()
+				
 		# context variables
-		"new request" | Out-File -Append -FilePath "./log.txt"
-		$requestObject = [RequestObject]::new($HttpListener)
-		# Write-Output "localPath: $($requestObject.LocalPath)"
-		Write-Output "url: $($requestObject.RequestUrl)"
-		# Write-Output "paths: $($requestObject.Paths)"
-		# Write-Output "controller: $($requestObject.Controller)"
-    
-		# RouteRequest $requestObject
-		$requestObject.RouteRequest()
+		if (-not $Global:responseClosed) {
+			Write-Host "StaticRequestObject"
+            $requestObject = [StaticRequestObject]::new($context)
+			$requestObject.RouteRequest()
+        }
 		
-		"end request" | Out-File -Append -FilePath "./log.txt"
+		if (-not $Global:responseClosed) {
+			Write-Host "ControllerRequestObject"
+			$requestObject = [ControllerRequestObject]::new($context)
+			$requestObject.RouteRequest()
+		}
+
+		if (-not $Global:responseClosed) {
+			Write-Host "PelegrinaRequestObject"
+			$requestObject = [PelegrinaRequestObject]::new($context)
+			$requestObject.RouteRequest()
+		}
 	}
 }
 finally {

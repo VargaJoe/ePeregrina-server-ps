@@ -1,4 +1,4 @@
-class RequestObject {
+class PelegrinaRequestObject {
     [System.Net.HttpListener]$HttpListener
     [System.Net.HttpListenerContext]$HttpContext
     [System.Net.HttpListenerRequest]$HttpRequest
@@ -42,9 +42,22 @@ class RequestObject {
     [string]$RequestType
     [bool]$IsResource
     
-    RequestObject([System.Net.HttpListener] $listener) {
-        $this.HttpListener = $listener
-        $this.HttpContext = $listener.GetContext()
+    PelegrinaRequestObject([System.Net.HttpListener] $listener) {
+        $this.Initialize($listener.GetContext())
+    }
+
+    PelegrinaRequestObject([System.Net.HttpListenerContext]$context) {
+        $this.Initialize($context)
+    }
+
+    [void]Initialize([System.Net.HttpListenerContext]$context) { 
+        # skip if response disposed
+        if ($context.Response.IsClosed) {
+            # not working solution needed!
+            return
+        }        
+
+        $this.HttpContext = $context
         $this.HttpRequest = $this.HttpContext.Request
         $this.RequestUrl = $this.HttpContext.Request.Url
         $this.LocalPath = ($this.RequestUrl.LocalPath -replace "//", "/") -replace "/$", ""
@@ -77,22 +90,22 @@ class RequestObject {
         $this.Action = ""
         $this.IsResource = ""
 
-        Write-Host "`n`nurl" $this.RequestUrl
+        Write-Host "url" $this.RequestUrl
         Write-Host "referrer" $this.HttpRequest.Headers["Referer"]
         Write-Host "accept" $this.HttpRequest.Headers["Accept"]
         Write-Host "user agent" $this.HttpRequest.UserAgent
 
         # webroot should be global from start script
-        $webRootPath = ($this.Settings.webFolder) -replace "../", "/" -replace "./", "/" -replace "//", "/"
-        if ($webRootPath.startswith("/")) {
-            $webRootPath = $Global:RootPath + $webRootPath
-            if (Test-Path -LiteralPath $webRootPath) {
-                $webRootPath = Resolve-Path -LiteralPath $webRootPath
-            } else {
-                write-host "webRootPath not found: $webRootPath"
-                exit
-            }
-        }
+        # $webRootPath = ($this.Settings.webFolder) -replace "../", "/" -replace "./", "/" -replace "//", "/"
+        # if ($webRootPath.startswith("/")) {
+        #     $webRootPath = $Global:RootPath + $webRootPath
+        #     if (Test-Path -LiteralPath $webRootPath) {
+        #         $webRootPath = Resolve-Path -LiteralPath $webRootPath
+        #     } else {
+        #         write-host "webRootPath not found: $webRootPath"
+        #         exit
+        #     }
+        # }
         
         if ($this.Paths.Count -lt 2 -or $this.Paths[1] -eq "") {
             # Index page
@@ -103,27 +116,27 @@ class RequestObject {
             return
         }
 
-        $testFilePath = Join-Path -Path $webRootPath.Path -ChildPath $this.LocalPath
-        if (Test-Path -LiteralPath $testFilePath -PathType Leaf) {
-            # File page
-            Write-Host "File resource"
-            $this.RequestType = "File"
-            $this.Controller = "File"
-            $this.Action = "Stream"
-            $this.ContextPath = Resolve-Path -LiteralPath $testFilePath
-            return
-        }
+        # $testFilePath = Join-Path -Path $webRootPath.Path -ChildPath $this.LocalPath
+        # if (Test-Path -LiteralPath $testFilePath -PathType Leaf) {
+        #     # File page
+        #     Write-Host "File resource"
+        #     $this.RequestType = "File"
+        #     $this.Controller = "File"
+        #     $this.Action = "Stream"
+        #     $this.ContextPath = Resolve-Path -LiteralPath $testFilePath
+        #     return
+        # }
 
         # Check if controller exists in the format "Show-{Controller}"
-        $this.Controller = $this.Paths[1]
-        $functionName = "Show-" + $this.Controller + "Controller"
-        if (Get-Command $functionName -ErrorAction SilentlyContinue) {
-            # Controller page
-            Write-Host "Controller page"
-            $this.ControllerFunction = $functionName
-            $this.RequestType = "Controller"
-            return 
-        }
+        # $this.Controller = $this.Paths[1]
+        # $functionName = "Show-" + $this.Controller + "Controller"
+        # if (Get-Command $functionName -ErrorAction SilentlyContinue) {
+        #     # Controller page
+        #     Write-Host "Controller page"
+        #     $this.ControllerFunction = $functionName
+        #     $this.RequestType = "Controller"
+        #     return 
+        # }
 
         # Category page
         $this.Category = $this.Paths[1]
@@ -222,23 +235,6 @@ class RequestObject {
     }
 
     RouteRequest() {
-        # /controller/action/parameter/s
-        if ($this.RequestType -eq "Controller") {
-            Write-Host "Controller page"
-            # Controller mode is handled by the controller function via naming convention
-            & $this.ControllerFunction $this
-            return
-        }
-
-        # /favicon.ico
-        # /styles/style.css
-        if ($this.RequestType -eq "File") {
-            Write-Host "File resource"
-            # If file exists on path file mode is handled by the binary handler
-            BinaryHandler $this
-            return
-        }
-
         # /
         # /index
         # /home

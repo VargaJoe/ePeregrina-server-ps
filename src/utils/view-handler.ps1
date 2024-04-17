@@ -1,14 +1,16 @@
 function Show-View {
     param(
+        # [parameter(Mandatory = $true)]
+        # [PelegrinaRequestObject]$requestObject,
         [parameter(Mandatory = $true)]
-        [RequestObject]$requestObject,
+        [ResponseObject]$response,
         [parameter(Mandatory = $true)]
         [string]$viewName,
         [parameter(Mandatory = $false)]
         [Object]$model
     )
-    "new response $viewName" | Out-File -Append -FilePath "./log.txt"
-    $response = [ResponseObject]::new($requestObject.HttpContext.Response)
+    # "new response $viewName" | Out-File -Append -FilePath "./log.txt"
+    # $response = [ResponseObject]::new($requestObject.HttpContext.Response)
     $response.ResponseType = "html"
 
     # Read the HTML content from the file
@@ -68,5 +70,5 @@ function Show-View {
     # Evaluated HTML content goes to response
     $response.ResponseString = $evaluatedView
     $response.Respond()
-    "after response $viewName" | Out-File -Append -FilePath "./log.txt"
+    # "after response $viewName" | Out-File -Append -FilePath "./log.txt"
 }
