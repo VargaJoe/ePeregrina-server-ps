@@ -1,19 +1,30 @@
-# Experimental PowerShell Implementation of an Ebook Server
+# Experimental Ebook Server: PowerShell Implementation
 
-This app is an experimental PowerShell implementation of an as is ebook server. It is not intended for production environments; rather, it's a playful development project that pushes the boundaries of PowerShell.
+## Overview
 
-## ePeregrina ebook server
+This project represents an experimental implementation of an as-is ebook server using PowerShell. It aims to explore the capabilities of PowerShell in building server applications, but it is important to note that this implementation is not intended for production use. Instead, it serves as a demonstration of what can be achieved with PowerShell.
 
-Ez valójában kísérletezés, miképp lehetne ebook szervert imitálni ebben a script nyelvben. Az indítás előtt meg kell adni a megosztani kívánt mappákat a `settings.json` beállításai között. Ezek a megosztások főkategóriaként jelennek meg a főoldalon, illetve ez adja az url routing alapját, mint például:
+## ePeregrina Ebook Server
+
+This is essentially an experiment to see how an ebook server could be simulated in this scripting language. To get started with this project, follow these steps:
+
+- Clone the repository to your local machine.
+- Navigate to the project directory.
+- Specify the folders to share in the `settings.json`` configuration. These shares appear as main categories on the homepage and provide the basis for URL routing, such as:
 "booksPaths" -> /books
 "comicsPaths" -> /comics
 
-Tetszőleges számú kategória adható meg, a feloldás feltétele, hogy `Paths` szóra végződjön. Minden kategória tetszőleges számú mappa útvonalat tartalmazhat, melyeket string tömbként kell megadni. A jelenlegi proof of concept megoldás kép, szöveg, cbz, epub és zip formátumú fájlokat kezel, illetve böngésző lehetőségeitől függően pdf kiterjesztésű file-ok is megjeleníthetők.
+- Launch the server script using PowerShell.
+
+```powershell
+.\program.ps1
+```
+
+Note: Any number of categories can be specified, with the condition that they end with the word Paths. Each category can contain any number of folder paths, which should be specified as string arrays. The current proof of concept solution handles image, text, cbz, epub, and zip file formats, and depending on browser capabilities, PDF files can also be displayed.
 
 ## Rendering logic
 
-A program 
-It handle url requests by HttpListener and url routing is handled by requesthandler classes. There are sample handlers for static files (`staticRequestObject`), mvc like controllers (`controllerRequestObject`) and custom routing (`ePeregrinaRequestObject`) for an imaginary ebook server, where Page rendering is made through by `.pshtml` files which are html templates with code blocks imitating `.cshtml` of dotnet, but instead c# it uses powershell scripts.
+The program handles URL requests using `HttpListener`, and URL routing is managed by request handler classes. There are sample handlers for static files (`staticRequestObject`), MVC-like controllers (`controllerRequestObject`), and custom routing (`ePeregrinaRequestObject`) for an imaginary ebook server. Page rendering is achieved through `.pshtml` files, which are HTML templates with code blocks imitating `.cshtml` files of dotnet, but instead of C#, it uses PowerShell scripts.
 
 ## Docker container
 
