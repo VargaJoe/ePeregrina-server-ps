@@ -2,31 +2,27 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></meta>
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
-        <link rel="stylesheet" type="text/css" href="/style/pelegrina.css"></link>
+        <link rel="stylesheet" type="text/css" href="/style/ePeregrina.css"></link>
         <title>pelegrin</title>
     </head>
     <body>
         <header>
-            <ul class="nav nav-bar-nav">
+            <nav class="nav nav-bar-nav">
                 <li><a class="home-btn" href="/"><i class="glyphicon glyphicon-home"></i></a></li>
-            </ul>
+            </nav>
 
-            <ul class="nav nav-bar-nav nav-bar-right">
+            <nav class="nav nav-bar-nav nav-bar-right">
                 <li><a href="./logout" title="Logout"><i class="glyphicon glyphicon-log-out"></i></a></li>
-            </ul>
+            </nav>
         </header>
-
-        <div class="content">
+        <section class="placeholder"></section>
+        <section>
             <%
             foreach ($item in $model.items) {
-                "<br/><br/><br/>" +
                 "<a href='$($item.Url)' class='rootlink'>$($item.Name)</a>"
             }
             %>
-            <br/>
-            <br/>
-        </div>
-        <br/>
-        <br/><a href="http://myurl" class="poweredby">powered by pelegrina</a>
+        </section>
+        <footer><a href="http://myurl" class="poweredby">powered by ePeregrina</a></footer>
     </body>
 </html>

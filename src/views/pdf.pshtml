@@ -2,47 +2,21 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></meta>
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
-        <link rel="stylesheet" type="text/css" href="/style/pelegrina.css"></link>
+        <link rel="stylesheet" type="text/css" href="/style/ePeregrina.css"></link>
         <title>pelegrin</title>
     </head>
     <body>
         <header>
-            <ul class="nav nav-bar-nav">
+            <nav class="nav nav-bar-nav">
                 <li><a class="home-btn" href="/"><i class="glyphicon glyphicon-home"></i></a></li>
-            </ul>
+            </nav>
 
-            <ul class="nav nav-bar-nav nav-bar-right">
+            <nav class="nav nav-bar-nav nav-bar-right">
                 <li><a href="./logout" title="Logout"><i class="glyphicon glyphicon-log-out"></i></a></li>
-            </ul>
+            </nav>
         </header>
-
-<style>
-    body, html {
-        margin: 0;
-        padding: 0;
-        overflow: hidden;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-    header {
-        flex-shrink: 0; /* Prevents the header from shrinking if there's not enough space */
-    }
-    .content {
-        flex-grow: 1; /* Allows the .content element to grow to take up the remaining space */
-        width: 100%;
-        overflow: auto; /* Adds a scrollbar to the .content element if the PDF is larger than its size */
-        padding: unset;
-    }
-    object {
-        height: 100%;
-        width: 100%;
-    }
-</style>
-
-        <div class="content" >
+        <section class="placeholder"></section>
+        <section class="pdf">
             <object
                 data="<%$($model.Url)%>"
                 type="application/pdf"
@@ -55,10 +29,7 @@
                     <a href="<%$($model.Url)%>">Download the PDF</a>
                 </p>
             </object>
-            <br/>
-            <br/>
-        </div>
-        <br/>
-        <br/><a href="http://myurl" class="poweredby">powered by pelegrina</a>
+        </section>
+        <footer><a href="http://myurl" class="poweredby">powered by ePeregrina</a></footer>
     </body>
 </html>

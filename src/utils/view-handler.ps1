@@ -1,7 +1,7 @@
 function Show-View {
     param(
         # [parameter(Mandatory = $true)]
-        # [PelegrinaRequestObject]$requestObject,
+        # [ePeregrinaRequestObject]$requestObject,
         [parameter(Mandatory = $true)]
         [ResponseObject]$response,
         [parameter(Mandatory = $true)]

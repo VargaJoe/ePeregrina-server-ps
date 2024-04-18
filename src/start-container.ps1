@@ -25,7 +25,7 @@ foreach ($sharedPath in $sharedPaths) {
 
 $execFile = "docker"
 $params = "run", "--rm", "-p", "38888:8888", "-d", "eol",
-        "--name", "pelegrina-app", "eol",
+        "--name", "ePeregrina-app", "eol",
         "-v", "$($dockerSettingsPath):/app/settings.json", "eol"
 
         $sfi = 0
@@ -34,7 +34,7 @@ $params = "run", "--rm", "-p", "38888:8888", "-d", "eol",
             $params += "-v", "$($sharedPath):/shared/$shdName", "eol"
         }
 
-        $params += "pelegrina-app"
+        $params += "ePeregrina-app"
 
 Write-Host "Running docker command"
 Write-Host "$execFile $($params -replace "eol", "$($eolChar)`r`n`t")"
