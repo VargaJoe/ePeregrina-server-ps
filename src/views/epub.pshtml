@@ -19,7 +19,6 @@
         <section>
             <%
             foreach ($item in $model.items) {
-                "<br/><br/><br/>" +
                 "<a href='$($item.Url)' class='rootlink'>$($item.Name)</a>"
             }
             %>
