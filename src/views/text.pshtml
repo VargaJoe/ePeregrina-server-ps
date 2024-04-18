@@ -7,15 +7,15 @@
     </head>
     <body>
         <header>
-            <ul class="nav nav-bar-nav">
+            <nav class="nav nav-bar-nav">
                 <li><a class="home-btn" href="/"><i class="glyphicon glyphicon-home"></i></a></li>
-            </ul>
+            </nav>
 
-            <ul class="nav nav-bar-nav nav-bar-right">
+            <nav class="nav nav-bar-nav nav-bar-right">
                 <li><a href="./logout" title="Logout"><i class="glyphicon glyphicon-log-out"></i></a></li>
-            </ul>
+            </nav>
         </header>
-
+        <section class="placeholder"></section>
         <section>
             <div style="font-family: monospace;" width="500px">
                 <%$model.textFile.Data%>
