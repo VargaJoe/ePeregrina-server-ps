@@ -2,7 +2,7 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></meta>
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
-        <link rel="stylesheet" type="text/css" href="/style/pelegrina.css"></link>
+        <link rel="stylesheet" type="text/css" href="/style/ePeregrina.css"></link>
         <title>pelegrin</title>
     </head>
     <body>
@@ -21,12 +21,12 @@
             </ul>
         </header>
 
-        <div class="content">
+        <section style="height:60px;margin:unset;padding:60px 0 0 0;">
+        
+        </section>
+        <section style="padding:15px">
             <img src="data:image/png;base64,<%$($model.image.Data)%>" alt="<%$model.image.Name%>"/>
-            <br/>
-            <br/>
-        </div>
-        <br/>
-        <br/><a href="http://myurl" class="poweredby">powered by pelegrina</a>
+        </section>
+        <footer><a href="http://myurl" class="poweredby">powered by ePeregrina</a></footer>
     </body>
 </html>
