@@ -5,7 +5,7 @@
         <link rel="stylesheet" type="text/css" href="/style/ePeregrina.css"></link>
         <title>pelegrin</title>
     </head>
-    <body class="pdf">
+    <body>
         <header>
             <nav class="nav nav-bar-nav">
                 <li><a class="home-btn" href="/"><i class="glyphicon glyphicon-home"></i></a></li>
@@ -16,7 +16,7 @@
             </nav>
         </header>
         <section class="placeholder"></section>
-        <section>
+        <section class="pdf">
             <object
                 data="<%$($model.Url)%>"
                 type="application/pdf"
