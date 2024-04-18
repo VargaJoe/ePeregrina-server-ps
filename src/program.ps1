@@ -34,9 +34,6 @@ try {
 	$stopFile = "./appoffline.htm"
 
 	While ($HttpListener.IsListening -and !(Test-Path -Path $stopFile)) {
-		if ([System.Console]::KeyAvailable -and [System.Console]::ReadKey($true).Key -eq 'Escape') {
-			break
-		}
 		$Global:responseClosed = $false
 		Write-Host "`n`n"
 		$context = $HttpListener.GetContext()

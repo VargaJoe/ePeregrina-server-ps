@@ -24,8 +24,7 @@ foreach ($sharedPath in $sharedPaths) {
 }
 
 $execFile = "docker"
-$params = "run", "--rm", "-p", "38888:8888", "-it", "eol",
-        # "-d", "eol",
+$params = "run", "--rm", "-p", "38888:8888", "-d", "eol",
         "--name", "pelegrina-app", "eol",
         "-v", "$($dockerSettingsPath):/app/settings.json", "eol"
 
