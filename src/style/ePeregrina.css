@@ -16,7 +16,24 @@ body {
   background-size: cover;
   background-position: center center;
   background-repeat: no-repeat;
-  background-attachment: fixed
+  background-attachment: fixed;
+
+
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+body.pdf {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 header {
@@ -28,6 +45,13 @@ header {
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
+
+
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000; /* Ensure the header is above other elements */
+  
 }
 
 header .glyphicon {
@@ -190,15 +214,38 @@ header .searchinput {
 /* end of nav */
 
 /* start of content */
+section,
 .content {
   clear: both;
   overflow: hidden;
-  padding: 15px;
+  padding: 60px 15px 15px 15px;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
+  
+
+  flex-grow: 1; /* Allows the .content element to grow to take up the remaining space */
+  width: 100%;
+  overflow: auto; /* Adds a scrollbar to the .content element if the PDF is larger than its size */
+  padding-left: unset;
+  padding-right: unset;
+  /* height:100%; */
 }
 
+.pdf section {
+  flex-grow: 1; /* Allows the .content element to grow to take up the remaining space */
+  width: 100%;
+  overflow: auto; /* Adds a scrollbar to the .content element if the PDF is larger than its size */
+  padding-left: unset;
+  padding-right: unset;
+}
+.pdf section img,
+.pdf section object {
+  height: 100%;
+  width: 100%;
+}
+
+section>a,
 .content>a {
   display: -ms-flexbox;
   display: flex;
@@ -224,8 +271,11 @@ header .searchinput {
   word-break: break-word; 
 }
 
+section>a:actve,
 .content>a:actve,
+section>a:focus,
 .content>a:focus,
+section>a:hover,
 .content>a:hover {
   color: #fff;
   text-decoration: none;
@@ -233,20 +283,26 @@ header .searchinput {
   background-color: rgba(0, 0, 0, .8) !important
 }
 
+section #orange,
 .content #orange {
   background-color: #cc7b19
 }
 
+section #blue,
 .content #blue {
   background-color: #00bfbf
 }
 
+section #files,
 .content #files {
   background-color: #fcce36
 }
 
+section #latest-books,
 .content #latest-books,
+section #latest-comics,
 .content #latest-comics,
+section .rootlink,
 .content .rootlink {
   color: #fff;
   border-color: #fff
