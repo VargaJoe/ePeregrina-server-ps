@@ -24,6 +24,6 @@
         <section class="html">
             <%$model.htmlFile.Data%>
         </section>
-        <footer><a href="http://myurl" class="poweredby">powered by ePeregrina</a></footer>
+        <footer><a href="https://github.com/VargaJoe/ePeregrina-server-ps" class="poweredby">powered by ePeregrina</a></footer>
     </body>
 </html>
