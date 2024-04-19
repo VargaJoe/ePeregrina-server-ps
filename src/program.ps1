@@ -52,8 +52,8 @@ try {
 		}
 
 		if (-not $Global:responseClosed) {
-			Write-Host "ePeregrinaRequestObject"
-			$requestObject = [ePeregrinaRequestObject]::new($context)
+			Write-Host "peregrinaRequestObject"
+			$requestObject = [peregrinaRequestObject]::new($context)
 			$requestObject.RouteRequest()
 		}
 

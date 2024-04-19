@@ -1,4 +1,4 @@
-class ePeregrinaRequestObject {
+class peregrinaRequestObject {
     [System.Net.HttpListener]$HttpListener
     [System.Net.HttpListenerContext]$HttpContext
     [System.Net.HttpListenerRequest]$HttpRequest
@@ -42,11 +42,11 @@ class ePeregrinaRequestObject {
     [string]$RequestType
     [bool]$IsResource
     
-    ePeregrinaRequestObject([System.Net.HttpListener] $listener) {
+    peregrinaRequestObject([System.Net.HttpListener] $listener) {
         $this.Initialize($listener.GetContext())
     }
 
-    ePeregrinaRequestObject([System.Net.HttpListenerContext]$context) {
+    peregrinaRequestObject([System.Net.HttpListenerContext]$context) {
         $this.Initialize($context)
     }
 
