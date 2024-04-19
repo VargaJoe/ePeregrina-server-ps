@@ -23,7 +23,7 @@ Note: Any number of categories can be specified, provided they end with the word
 
 ## Rendering logic
 
-The program handles URL requests using `HttpListener`, and URL routing is managed by request handler classes. It includes sample handlers for static files (`staticRequestObject`), MVC-like controllers (`controllerRequestObject`), and custom routing (`ePeregrinaRequestObject`) for an imaginary ebook server. Page rendering is achieved through `.pshtml` files, which are HTML templates with code blocks imitating `.cshtml` files of dotnet. However, instead of C#, PowerShell scripts are used.
+The program handles URL requests using `HttpListener`, and URL routing is managed by request handler classes. It includes sample handlers for static files (`staticRequestObject`), MVC-like controllers (`controllerRequestObject`), and custom routing (`peregrinaRequestObject`) for an imaginary ebook server. Page rendering is achieved through `.pshtml` files, which are HTML templates with code blocks imitating `.cshtml` files of dotnet. However, instead of C#, PowerShell scripts are used.
 
 ## Docker container
 
