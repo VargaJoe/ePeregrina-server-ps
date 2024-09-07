@@ -3,17 +3,18 @@ class EpubModelObject {
 
     EpubModelObject($requestObject) {
         $this.model = @{
+            type = "list"
             category = "epub"
             items = $this.GetEpubTableOfContents($requestObject.ContextPath) | ForEach-Object {
-               $urlWithId = $_.Url -replace "#", "?id=$($_.Id)#"
-               $relUrlPath = $requestObject.LocalPath + "/" + $urlWithId
-       
-               # Create a custom object
-               New-Object PSObject -Property @{
-                   Name = $_.Name 
-                   Url = $relUrlPath
-               }
-           }
+                $urlWithId = $_.Url -replace "#", "?id=$($_.Id)#"
+                $relUrlPath = $requestObject.LocalPath + "/" + $urlWithId
+
+                # Create a custom object
+                New-Object PSObject -Property @{
+                    Name = $_.Name 
+                    Url = $relUrlPath
+                }
+            }
         }
     }
 

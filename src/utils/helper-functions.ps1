@@ -64,7 +64,7 @@ function PageHandler($requestObject) {
     if ([System.Management.Automation.PSTypeName]$typeName) {
         $pageModel = New-Object -TypeName $typeName -ArgumentList $requestObject
     }
-    Write-Host "model type" $pageModel.type
+    Write-Host "model type" $pageModel.model.type
     if ($null -eq $pageModel -or $null -eq $pageModel.model -or $pageModel.model.type -eq "error") {
         Write-Host "Model not found or error occured."
         return
