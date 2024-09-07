@@ -148,7 +148,7 @@ class peregrinaRequestObject {
 
             $ufilter = ($this.Settings.containerFilter) -join "|"
             $efilter = ($this.Settings.containerFilter | ForEach-Object { [regex]::Escape($_) }) -join "|"
-            if ($this.RelativePath -match ".($ufilter)") {
+            if ($this.RelativePath -match "\.($ufilter)") {
                 $index = 0
                 $match = [Regex]::Match($this.RelativePath, $ufilter)
                 if ($match.Success) {
