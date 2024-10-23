@@ -19,7 +19,15 @@
         <section>
             <%
             foreach ($item in $model.items) {
-                "<a href='$($item.Url)' class='rootlink'>$($item.Name)</a>"
+                if ($item.Image) {
+                    $image = "<img src='data:image/png;base64,$($item.Image)' alt='$($item.Name)' />"
+                } else {
+                    $image = ""
+                }
+
+                "<a href='$($item.Url)' class='rootlink' style='background-blend-mode:soft-light;background-size:cover;background-image: url(data:image/png;base64,$($item.Image));'>
+                    $($item.Name)
+                </a>"
             }
             %>
         </section>
