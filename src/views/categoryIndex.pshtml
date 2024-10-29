@@ -18,15 +18,11 @@
         <section class="placeholder"></section>
         <section>
             <%
-            "asd $($model.items.length)"
             foreach ($item in $model.items) {                
                  if ($item.Url) {
-                "<a href='$($item.Url)' class='rootlink' style='background-blend-mode:soft-light;background-size:cover;background-image: url(data:image/png;base64,$($item.Thumbnail));'>
+                "<a href='$($item.Url)' class='rootlink' style='background-blend-mode:soft-light;background-size:cover;background-image: url(`"$($item.Cover)`");'>
                     $($item.Name)
                 </a>"
-                 } else {
-                    "1 $($item.Url)"
-                    "2 $($item.Name)"
                  }
             }
             %>
