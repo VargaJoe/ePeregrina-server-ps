@@ -145,9 +145,15 @@ class peregrinaRequestObject {
             return
         }
 
+        # is this used somewhere?
         if ($this.RelativePath[-1] -eq "view") {
             $this.RelativePath = $this.RelativePath[0..($this.RelativePath.Count - 2)]
             $this.Action = "view"
+        }
+        
+        Write-Host $this.UrlVariables
+        if ($this.UrlVariables["action"]) {
+            $this.Action = $this.UrlVariables["action"]
         }
 
         if ($this.Paths.Count -gt $relativeIndex) {
@@ -212,6 +218,13 @@ class peregrinaRequestObject {
     }
 
     RouteRequest() {
+        # action handler
+        if ($this.Action) {
+            Write-Host "ePeregrina action handler"
+            ActionHandler($this)
+            return
+        }
+
         # /
         # /index
         # /home

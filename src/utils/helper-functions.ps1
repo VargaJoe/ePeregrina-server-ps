@@ -16,6 +16,7 @@ function Show-Context {
     Write-Host "rel" $($requestObject.RelativePath)
     Write-Host "virt" $($requestObject.VirtualPath)
     Write-Host "abs" $($requestObject.ContextPath)
+    Write-Host "action" $($requestObject.Action)
 }
 
 function Get-MimeType {
@@ -74,4 +75,25 @@ function PageHandler($requestObject) {
     # Show-View $requestObject $pageTemplate $pageModel.model
     $response = [ResponseObject]::new($requestObject.HttpContext.Response)
     Show-View $response $pageTemplate $pageModel.model
+}
+
+function ActionHandler($requestObject) {
+    Show-Context
+    $typeName = $this.ContextModelType + $this.VirtualModelType + $this.Action + "ModelObject"
+    Write-Host "action type $typeName"
+    if ([System.Management.Automation.PSTypeName]$typeName) {
+        # $actionModel = New-Object -TypeName $typeName -ArgumentList $requestObject
+        # $actionModel = [CbzCoverModelObject]::new($this)
+        # $actionModel = [System.Activator]::CreateInstance($type, @($this))
+        $actionModel = New-Object -TypeName $typeName -ArgumentList $requestObject
+
+
+    }
+    # Write-Host "action model type" $actionModel.model.type
+    # if ($null -eq $actionModel -or $null -eq $actionModel.model -or $actionModel.model.type -eq "error") {
+    #     Write-Host "Model not found or error occured."
+    #     return
+    # }
+
+    $actionModel.GetResponse($this)
 }

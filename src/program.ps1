@@ -7,6 +7,10 @@ Get-ChildItem -LiteralPath ./models -Filter *.ps1 | ForEach-Object {
     . $_.FullName
 }
 
+Get-ChildItem -LiteralPath ./actions -Filter *.ps1 | ForEach-Object {
+    . $_.FullName
+}
+
 Get-ChildItem -LiteralPath ./requestHandler -Filter *.ps1 | ForEach-Object {
     . $_.FullName
 }
