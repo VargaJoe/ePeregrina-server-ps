@@ -8,3 +8,4 @@ src/log*.txt
 src/settings-docker.json
 src/magazine*
 src/covers/*
+src/thumbnails/*
