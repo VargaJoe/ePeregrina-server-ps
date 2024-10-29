@@ -15,17 +15,17 @@ class CbzCoverModelObject {
         Show-Context
 
         $contextFileName = [System.IO.Path]::GetFileNameWithoutExtension($requestObject.ContextPath)
-        $thumbnailPath = "$($requestObject.WebFolderPath)\covers\$($contextFileName).jpg"
+        $coverPath = "$($requestObject.WebFolderPath)\covers\$($contextFileName).jpg"
 
-        write-host "!!!!Cover Container Path: $($thumbnailPath)"        
+        write-host "!!!!Cover Container Path: $($coverPath)"        
 
-        if (-not (Test-Path -LiteralPath $thumbnailPath)) {
-            $this.GetCoverFromZipContent($requestObject.ContextPath) 
+        if (-not (Test-Path -LiteralPath $coverPath)) {
+            $this.GetCoverFromZipContent($requestObject.ContextPath)
         }
 
         $this.response.ContentType = "image/jpeg"
         $this.response.ResponseString = $Null
-        $this.response.FilePath = $thumbnailPath       
+        $this.response.FilePath = $coverPath       
         $this.response.Respond()
     }
 
