@@ -33,7 +33,11 @@ function Show-View {
         $codeSnippet = $match.Groups[1].Value  # Access the matched code snippet
         Write-Host "matched: $codeSnippet"
         # Evaluate the code snippet
+        try {
         $evaluatedSnippet = Invoke-Expression $codeSnippet
+        } catch {
+            $evaluatedSnippet = "Error: $_"
+        }
         if ($evaluatedSnippet -is [array]) {
             $evaluatedSnippet = $evaluatedSnippet -join " "
         }
