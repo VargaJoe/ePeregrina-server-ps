@@ -159,6 +159,35 @@ section.html {
   font-size: large;
 }
 
+section>img.thumbnail {
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-align: center;
+  align-items: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+
+  width: 200px;
+  height: 200px;
+  margin: 15px;
+  padding: 5px;
+
+  transition: all .2s;
+  color: #000;
+  font-family: "Open Sans Semibold";
+  font-size: 18px;
+  text-align: center;
+  text-transform: uppercase;
+  line-height: 1.4;
+  box-shadow: 0 0 2px rgba(0, 0, 0, .35);
+  background-color: rgba(0, 0, 0, .45);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
+
+  cursor: pointer;
+}
+
 section>a {
   display: -ms-flexbox;
   display: flex;
@@ -166,10 +195,12 @@ section>a {
   align-items: center;
   -ms-flex-pack: center;
   justify-content: center;
-  width: 130px;
-  height: 130px;
+
+  width: 210px;
+  height: 210px;
   margin: 15px;
   padding: 5px;
+
   transition: all .2s;
   color: #000;
   font-family: "Open Sans Semibold";
