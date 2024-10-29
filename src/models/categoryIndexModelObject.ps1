@@ -8,27 +8,11 @@ class CategoryIndexModelObject {
                 $FolderPathResolved = Resolve-Path -LiteralPath $_.pathString            
                 Get-ChildItem -LiteralPath $_.pathString | ForEach-Object {
                     $relUrlPath = "/" + $requestObject.Category + "/" + $folderIndex + $_.FullName.Replace($FolderPathResolved, "").Replace("\", "/")
-                    $contextFileName = [System.IO.Path]::GetFileNameWithoutExtension($relUrlPath)
-                    $thumbnailContainerPath = "$($requestObject.WebFolderPath)\covers\$($contextFileName).jpg"
-                    
-                    $thumbnailBase64 = ""
-                    if (Test-Path $thumbnailContainerPath) {
-                        $image = [System.Drawing.Image]::FromFile($thumbnailContainerPath)
-                        $imageStream = New-Object System.IO.MemoryStream
-                        $image.Save($imageStream, [System.Drawing.Imaging.ImageFormat]::Jpeg)
-                        $imageStream.Position = 0
-                        $imageBytes = New-Object byte[] $imageStream.Length
-                        $imageStream.Read($imageBytes, 0, $imageStream.Length)
-                        $thumbnailBase64 = [Convert]::ToBase64String($imageBytes)
-                        $imageStream.Close()
-                        $image.Dispose()                        
-                    }
-                    Write-Host "MIVAN????" $_.BaseName
                     # Create a custom object
                     New-Object PSObject -Property @{
                         Name = $_.BaseName
                         Url = $relUrlPath
-                        Thumbnail = $thumbnailBase64
+                        Cover = $relUrlPath + "?action=Cover"
                     }
                 }
                 $folderIndex = $folderIndex + 1
