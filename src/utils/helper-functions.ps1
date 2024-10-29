@@ -85,8 +85,12 @@ function ActionHandler($requestObject) {
         # $actionModel = New-Object -TypeName $typeName -ArgumentList $requestObject
         # $actionModel = [CbzCoverModelObject]::new($this)
         # $actionModel = [System.Activator]::CreateInstance($type, @($this))
-        $actionModel = New-Object -TypeName $typeName -ArgumentList $requestObject
-
+        try {
+            $actionModel = New-Object -TypeName $typeName -ArgumentList $requestObject
+        } catch {
+            Write-Host "Error: $_"
+            return
+        }
 
     }
     # Write-Host "action model type" $actionModel.model.type
