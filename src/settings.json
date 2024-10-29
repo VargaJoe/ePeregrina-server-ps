@@ -17,6 +17,8 @@
     "passwordHash" : "5346346436436436"
   } ],
   "webFolder": "./",
+  "thumbnailContainerPath": "./thumbnails",
+  "thumbnailCacheEnabled": false,
   "containerFilter": ["zip", "cbz", "epub"],
   "FileTypes": {
     "jpeg": "image",

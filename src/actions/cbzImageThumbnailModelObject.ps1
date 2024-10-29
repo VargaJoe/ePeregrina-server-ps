@@ -14,24 +14,44 @@ class CbzImageThumbnailModelObject {
         Write-Host "Get Thumbnail Action Response"
         Show-Context
 
+        $thumbnailContainerPath = $requestObject.Settings.thumbnailContainerPath
+        $thumbnailCacheEnabled = $requestObject.Settings.thumbnailCacheEnabled
+        if ($thumbnailContainerPath) {
+            $thumbnailContainerPath = Resolve-Path -LiteralPath $thumbnailContainerPath
+        }
+
+        $selectedImage = $requestObject.VirtualPath.TrimStart('/')
         $contextFileName = [System.IO.Path]::GetFileNameWithoutExtension($requestObject.ContextPath)
-        $thumbnailPath = "$($requestObject.WebFolderPath)\Thumbnails\$($contextFileName).jpg"
+        $virtualFileName = [System.IO.Path]::GetFileNameWithoutExtension($selectedImage)
+        $thumbnailPath = "$($thumbnailContainerPath)\$($contextFileName)-$($virtualFileName).jpg"
+        
+        write-host "!!!!Thumbnail Container Path: $($thumbnailPath)"
+        write-host "thumbnail cache: $($thumbnailCacheEnabled)"
 
-        write-host "!!!!Thumbnail Container Path: $($thumbnailPath)"        
-
+        
         $bytes = $Null
         if (-not (Test-Path -LiteralPath $thumbnailPath)) {
-            $selectedImage = $requestObject.VirtualPath.TrimStart('/')
-            $bytes = $this.GetThumbnailFromZipContent($requestObject.ContextPath, $selectedImage) 
+            Write-Host "Thumbnail Cache Not Found: $thumbnailPath"
+            $bytes = $this.GetThumbnailFromZipContent($requestObject.ContextPath, $selectedImage, $thumbnailPath, $thumbnailCacheEnabled)
+        }
+
+        if ($thumbnailCacheEnabled) {
+            Write-Host "Thumbnail Cache Enabled: $thumbnailPath"
+            $this.response.FilePath = $thumbnailPath
+        } elseif (Test-Path -LiteralPath $thumbnailPath) {
+            Write-Host "Thumbnail Cache Disabled but Found nonetheless: $thumbnailPath"
+            $this.response.FilePath = $thumbnailPath
+        } else {
+            Write-Host "Thumbnail Cache Disabled"
+            $this.response.ResponseBytes = $bytes
         }
 
         $this.response.ContentType = "image/jpeg"
         $this.response.ResponseString = $Null
-        $this.response.ResponseBytes = $bytes
         $this.response.Respond()
     }
 
-    [PSCustomObject]GetThumbnailFromZipContent([string]$Path,[string]$FileName) {
+    [PSCustomObject]GetThumbnailFromZipContent([string]$Path,[string]$FileName,[string]$thumbnailPath,[bool]$thumbnailCacheEnabled) {
         write-host "!!!!Request Object: $($Path)"
         $zipFile = [System.IO.Compression.ZipFile]::OpenRead("$Path")        
         $bytes = $Null
@@ -46,11 +66,16 @@ class CbzImageThumbnailModelObject {
         $originalImage = [System.Drawing.Image]::FromStream($memoryStream)
         $thumbnailImage = $originalImage.GetThumbnailImage($thumbnailWidth, $thumbnailHeight, $null, [IntPtr]::Zero)
 
-        $thumbnailStream = New-Object System.IO.MemoryStream
-        $thumbnailImage.Save($thumbnailStream, [System.Drawing.Imaging.ImageFormat]::Jpeg)
-        $bytes = $thumbnailStream.ToArray()
-
-        $thumbnailStream.Dispose()
+        if ($thumbnailCacheEnabled) {
+            write-host "!!!!Cover Container Path: $($thumbnailPath)"
+            $thumbnailImage.Save($thumbnailPath, [System.Drawing.Imaging.ImageFormat]::Jpeg)
+        } else {
+            $thumbnailStream = New-Object System.IO.MemoryStream
+            $thumbnailImage.Save($thumbnailStream, [System.Drawing.Imaging.ImageFormat]::Jpeg)
+            $bytes = $thumbnailStream.ToArray()
+            $thumbnailStream.Dispose()
+        }
+        
         $thumbnailImage.Dispose()
         $originalImage.Dispose()
         $memoryStream.Close()
