@@ -11,43 +11,84 @@ class PdfCoverModelObject {
     }
 
     [void] GetResponse($requestObject) {
-        Write-Host "Get Cover Action Response"
+        Write-Host "Get Cover Action on Pdf Response"
         Show-Context
 
+        $coverFolder = $requestObject.Settings.coverFolder
+        $coverCache = $requestObject.Settings.coverCache
+        if ($coverFolder) {
+            $coverFolder = Resolve-Path -LiteralPath $coverFolder
+        }
+
         $contextFileName = [System.IO.Path]::GetFileNameWithoutExtension($requestObject.ContextPath)
-        $coverPath = "$($requestObject.WebFolderPath)\covers\$($contextFileName)"
+        $preCoverPath = "$($coverFolder)\$($contextFileName)"
+        $coverPath = "$($preCoverPath).jpg"
+        
         $toolsFolder = $requestObject.Settings.toolsFolder
         $pdfImagesCli = Resolve-Path -LiteralPath "$toolsFolder\pdfimages.exe"
 
-        Write-Host "!!!!Cover Path: $($coverPath)"
+        Write-Host "!!!!Pdf Cover PrePath: $($preCoverPath)"
+        Write-Host "!!!!Pdf Cover Path: $($coverPath)"
+        write-host "Cover cache: $($coverCache)"
         Write-Host "pdfImagesCli: $($pdfImagesCli)"
 
+        $bytes = $Null
         if (-not (Test-Path -LiteralPath $coverPath)) {
-            $this.GetCoverFromPdfContent($requestObject.ContextPath, $coverPath, $pdfImagesCli)
+            Write-Host "Cover Cache Not Found: $coverPath"
+            $bytes = $this.GetCoverFromPdfContent($requestObject.ContextPath, $preCoverPath, $coverPath, $coverCache, $pdfImagesCli)
         }
 
-        # pdfImagesCli output naming workaround
-        $coverPath = $coverPath + "-0000.jpg"
-        Write-Host "!!!!Cover Path: $($coverPath)"
+        if ($coverCache -and (Test-Path -LiteralPath $coverPath)) {
+            Write-Host "Cover Cache Enabled: $coverPath"
+            $this.response.FilePath = $coverPath
+        } elseif (Test-Path -LiteralPath $coverPath) {
+            Write-Host "Cover Cache Disabled but Found nonetheless: $coverPath"
+            $this.response.FilePath = $coverPath
+        } else {
+            Write-Host "Cover Cache Disabled"
+            $this.response.ResponseBytes = $bytes
+        }
 
         $this.response.ContentType = "image/jpeg"
         $this.response.ResponseString = $Null
-        $this.response.FilePath = $coverPath       
         $this.response.Respond()
     }
 
-    [PSCustomObject]GetCoverFromPdfContent([string]$Path, [string]$coverPath, [string]$pdfImagesCli) {
+    [PSCustomObject]GetCoverFromPdfContent([string]$Path, [string]$preCoverPath, [string]$CoverPath, [bool]$coverCache, [string]$pdfImagesCli) {
         write-host "!!!!Request Object: $($Path)"
+        $tmpCoverPath = "$($preCoverPath)-0000.jpg"
+        $bytes = $null
         try {
-            # info: https://www.xpdfreader.com/pdfimages-man.html
-            & $pdfImagesCli -j -l 1 $Path $coverPath
+            if (-not (Test-Path -LiteralPath $tmpCoverPath)) {
+                # info: https://www.xpdfreader.com/pdfimages-man.html
+                & $pdfImagesCli -j -l 1 $Path $preCoverPath    
+            }           
 
             # TODO: file should be renamed and resized
+            if (Test-Path -LiteralPath $tmpCoverPath) {
+                $coverWidth = 120
+                $coverHeight = 120
+                $originalImage = [System.Drawing.Image]::FromFile($tmpCoverPath)
+                $coverImage = $originalImage.GetThumbnailImage($coverWidth, $coverHeight, $null, [IntPtr]::Zero)
+
+                if ($coverCache) {
+                    write-host "!!!!Cover Container Path: $($coverPath)"
+                    $coverImage.Save($coverPath, [System.Drawing.Imaging.ImageFormat]::Jpeg)
+                } else {
+                    $coverStream = New-Object System.IO.MemoryStream
+                    $coverImage.Save($coverStream, [System.Drawing.Imaging.ImageFormat]::Jpeg)
+                    $bytes = $coverStream.ToArray()
+                    $coverStream.Dispose()
+                }
+                
+                $coverImage.Dispose()
+                $originalImage.Dispose()                
+            }            
         }
         catch {
-            return $false
+            return $bytes
         }        
 
-        return $true
+        return $bytes
     }
 }
