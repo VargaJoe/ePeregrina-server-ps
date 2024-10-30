@@ -14,26 +14,46 @@ class CbzCoverModelObject {
         Write-Host "Get Cover Action Response"
         Show-Context
 
+        $coverFolder = $requestObject.Settings.coverFolder
+        $coverCache = $requestObject.Settings.coverCache
+        if ($coverFolder) {
+            $coverFolder = Resolve-Path -LiteralPath $coverFolder
+        }
+
         $contextFileName = [System.IO.Path]::GetFileNameWithoutExtension($requestObject.ContextPath)
-        $coverPath = "$($requestObject.WebFolderPath)\covers\$($contextFileName).jpg"
+        $coverPath = "$($coverFolder)\$($contextFileName).jpg"
 
         write-host "!!!!Cover Container Path: $($coverPath)"        
+        write-host "Cover cache: $($coverCache)"
 
+        $bytes = $Null
         if (-not (Test-Path -LiteralPath $coverPath)) {
-            $this.GetCoverFromZipContent($requestObject.ContextPath)
+            Write-Host "Cover Cache Not Found: $coverPath"
+            $bytes = $this.GetCoverFromZipContent($requestObject.ContextPath, $coverPath, $coverCache)
+        }
+
+        if ($coverCache -and (Test-Path -LiteralPath $coverPath)) {
+            Write-Host "Cover Cache Enabled: $coverPath"
+            $this.response.FilePath = $coverPath
+        } elseif (Test-Path -LiteralPath $coverPath) {
+            Write-Host "Cover Cache Disabled but Found nonetheless: $coverPath"
+            $this.response.FilePath = $coverPath
+        } else {
+            Write-Host "Cover Cache Disabled"
+            $this.response.ResponseBytes = $bytes
         }
 
         $this.response.ContentType = "image/jpeg"
         $this.response.ResponseString = $Null
-        $this.response.FilePath = $coverPath       
         $this.response.Respond()
     }
 
-    [PSCustomObject]GetCoverFromZipContent([string]$Path) {
+    [PSCustomObject]GetCoverFromZipContent([string]$Path,[string]$coverPath,[bool]$coverCache) {
         write-host "!!!!Request Object: $($Path)"
         $zipFile = [System.IO.Compression.ZipFile]::OpenRead("$Path")        
+        $bytes = $Null
         $firstItem = $true;
-        $result = $zipFile.Entries | Where-Object { $_.FullName -notlike "__MACOSX*" -and $_.FullName -notlike "*/" } | ForEach-Object {
+        $zipFile.Entries | Where-Object { $_.FullName -notlike "__MACOSX*" -and $_.FullName -notlike "*/" } | ForEach-Object {
             $entry = $_
             # Get cover image
             if ($firstItem) {
@@ -41,29 +61,32 @@ class CbzCoverModelObject {
                 $memoryStream = New-Object System.IO.MemoryStream
                 $stream.CopyTo($memoryStream)
 
-                # $memoryStream.Position = 0
-                # $bytes = $memoryStream.ToArray()
-
                 # test image start
-                $thumbnailWidth = 120
-                $thumbnailHeight = 120
+                $coverWidth = 120
+                $coverHeight = 120
                 $originalImage = [System.Drawing.Image]::FromStream($memoryStream)
-                $thumbnailImage = $originalImage.GetThumbnailImage($thumbnailWidth, $thumbnailHeight, $null, [IntPtr]::Zero)
-                $contextFileName = [System.IO.Path]::GetFileNameWithoutExtension($requestObject.ContextPath)
-                $thumbnailContainerPath = "$($requestObject.WebFolderPath)\covers\$($contextFileName).jpg"
-                write-host "!!!!Cover Container Path: $($thumbnailContainerPath)"
-                $thumbnailImage.Save($thumbnailContainerPath, [System.Drawing.Imaging.ImageFormat]::Jpeg)
+                $coverImage = $originalImage.GetThumbnailImage($coverWidth, $coverHeight, $null, [IntPtr]::Zero)
 
-                $stream.Close()
+                if ($coverCache) {
+                    write-host "!!!!Cover Container Path: $($coverPath)"
+                    $coverImage.Save($coverPath, [System.Drawing.Imaging.ImageFormat]::Jpeg)
+                } else {
+                    $coverStream = New-Object System.IO.MemoryStream
+                    $coverImage.Save($coverStream, [System.Drawing.Imaging.ImageFormat]::Jpeg)
+                    $bytes = $coverStream.ToArray()
+                    $coverStream.Dispose()
+                }
+
+                $coverImage.Dispose()
+                $originalImage.Dispose()                
                 $memoryStream.Close()
-                $originalImage.Dispose()
-                $thumbnailImage.Dispose()
+                $stream.Close()
                 
                 $firstItem = $false
             }
         }
         Write-Host "dispose zipfile"
         $zipFile.Dispose()
-        return $result
+        return $bytes
     }
 }

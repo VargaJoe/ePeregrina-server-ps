@@ -18,8 +18,10 @@
   } ],
   "webFolder": "./",
   "toolsFolder": "./tools",
-  "thumbnailContainerPath": "./thumbnails",
-  "thumbnailCacheEnabled": false,
+  "coverFolder": "./cache/covers",
+  "coverCache": true,
+  "thumbnailFolder": "./cache/thumbnails",
+  "thumbnailCache": true,  
   "containerFilter": ["zip", "cbz", "epub"],
   "FileTypes": {
     "jpeg": "image",
