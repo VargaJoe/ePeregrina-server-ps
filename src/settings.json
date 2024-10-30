@@ -18,6 +18,7 @@
   } ],
   "webFolder": "./",
   "toolsFolder": "./tools",
+  "tmpFolder": "./cache/tmp",
   "coverFolder": "./cache/covers",
   "coverCache": true,
   "thumbnailFolder": "./cache/thumbnails",

@@ -14,20 +14,32 @@ class PdfCoverModelObject {
         Write-Host "Get Cover Action on Pdf Response"
         Show-Context
 
+        $tmpFolder = $requestObject.Settings.tmpFolder
         $coverFolder = $requestObject.Settings.coverFolder
         $coverCache = $requestObject.Settings.coverCache
+        if ($tmpFolder) {
+            if (Test-Path -LiteralPath $tmpFolder) {
+                $tmpFolder = Resolve-Path -LiteralPath $tmpFolder
+            } else {
+                $tmpFolder = New-Item -ItemType Directory -Path $tmpFolder
+            }
+        }
         if ($coverFolder) {
-            $coverFolder = Resolve-Path -LiteralPath $coverFolder
+            if (Test-Path -LiteralPath $coverFolder) {
+                $coverFolder = Resolve-Path -LiteralPath $coverFolder
+            } else {
+                $coverFolder = New-Item -ItemType Directory -Path $coverFolder
+            }
         }
 
         $contextFileName = [System.IO.Path]::GetFileNameWithoutExtension($requestObject.ContextPath)
-        $preCoverPath = "$($coverFolder)\$($contextFileName)"
-        $coverPath = "$($preCoverPath).jpg"
+        $preCoverPath = "$($tmpFolder)\$($contextFileName)"
+        $coverPath = "$($coverFolder)\$($contextFileName).jpg"
         
         $toolsFolder = $requestObject.Settings.toolsFolder
         $pdfImagesCli = Resolve-Path -LiteralPath "$toolsFolder\pdfimages.exe"
 
-        Write-Host "!!!!Pdf Cover PrePath: $($preCoverPath)"
+        Write-Host "!!!!Pdf Temp Cover PrePath: $($preCoverPath)"
         Write-Host "!!!!Pdf Cover Path: $($coverPath)"
         write-host "Cover cache: $($coverCache)"
         Write-Host "pdfImagesCli: $($pdfImagesCli)"
@@ -60,6 +72,7 @@ class PdfCoverModelObject {
         $bytes = $null
         try {
             if (-not (Test-Path -LiteralPath $tmpCoverPath)) {
+                Write-Host "Prepare Cover: $tmpCoverPath"
                 # info: https://www.xpdfreader.com/pdfimages-man.html
                 & $pdfImagesCli -j -l 1 $Path $preCoverPath    
             }           
@@ -75,6 +88,7 @@ class PdfCoverModelObject {
                     write-host "!!!!Cover Container Path: $($coverPath)"
                     $coverImage.Save($coverPath, [System.Drawing.Imaging.ImageFormat]::Jpeg)
                 } else {
+                    write-host "Show cover image from stream..."
                     $coverStream = New-Object System.IO.MemoryStream
                     $coverImage.Save($coverStream, [System.Drawing.Imaging.ImageFormat]::Jpeg)
                     $bytes = $coverStream.ToArray()
