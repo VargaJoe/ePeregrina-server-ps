@@ -7,3 +7,13 @@ src/!cleanup*
 src/log*.txt
 src/settings-docker.json
 src/magazine*
+src/covers/*
+src/thumbnails/*
+src/cache/*
+src/tools/*
+
+# experimentals
+src/Dockerfile
+src/mysql.ps1
+src/program-async-x.ps1
+src/test.ps1

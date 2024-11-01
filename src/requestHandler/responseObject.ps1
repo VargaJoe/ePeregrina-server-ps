@@ -41,7 +41,7 @@ class ResponseObject {
                 $ResponseBuffer = $this.ResponseBytes
             } elseif ($this.ResponseString -and $this.ResponseString.Length -gt 0) {
                 $ResponseBuffer = [System.Text.Encoding]::UTF8.GetBytes($this.ResponseString)
-            } elseif ($this.filepath) {
+            } elseif ($this.filepath -and (Test-Path -Path $this.FilePath)) {
                 $ResponseBuffer = [System.IO.File]::ReadAllBytes($this.FilePath)
             } else {
                 $this.HttpResponse.StatusCode = 404
@@ -55,6 +55,7 @@ class ResponseObject {
                 # $this.HttpResponse.OutputStream.Write($ResponseBuffer, 0, $ResponseBuffer.Length)
                 try {
                     $this.HttpResponse.OutputStream.Write($ResponseBuffer, 0, $ResponseBuffer.Length)
+                    $this.HttpResponse.OutputStream.Close()
                 } catch {
                     # Write-Host "Error writing to OutputStream: $_"
                 }

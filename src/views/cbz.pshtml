@@ -19,7 +19,10 @@
         <section>
             <%
             foreach ($item in $model.items) {
-                "<a href='$($item.Url)' class='rootlink'>$($item.Name)</a>"
+                "<img src='$($item.Thumbnail)' width='200px' height='200px' loading='lazy' class='thumbnail' onclick='window.location.href=`"$($item.Url)`"'/>"
+                #"<a href='$($item.Url)' class='rootlink' style='background-blend-mode:soft-light;background-size:cover;background-image: url(`"$($item.Thumbnail)`");'>
+                #    <img src='$($item.Thumbnail)' width='200px' height='200px' loading='lazy'/>
+                #</a>"
             }
             %>
         </section>

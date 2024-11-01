@@ -10,13 +10,19 @@
     {
       "pathString" : "./books",
       "userName" : [ "username" ]
-    }    
+    }
   ],
   "users" : [ {
     "name" : "username",
     "passwordHash" : "5346346436436436"
   } ],
   "webFolder": "./",
+  "toolsFolder": "./tools",
+  "tmpFolder": "./cache/tmp",
+  "coverFolder": "./cache/covers",
+  "coverCache": true,
+  "thumbnailFolder": "./cache/thumbnails",
+  "thumbnailCache": true,  
   "containerFilter": ["zip", "cbz", "epub"],
   "FileTypes": {
     "jpeg": "image",

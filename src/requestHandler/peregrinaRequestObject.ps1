@@ -34,6 +34,8 @@ class peregrinaRequestObject {
     [string]$ContainerPath
     # parent path to the file or folder on the webserver
     [string]$ContextPath
+    # webfolder path for system purposes on the webserver
+    [string]$WebFolderPath
     # path to the file or folder on webserver or under the container
     [string]$VirtualPath
     [string]$ReducedLocalPath # Local path without the virtual path
@@ -80,6 +82,7 @@ class peregrinaRequestObject {
         $this.VirtualModelType = ""      
         $this.VirtualPath = ""
         $this.ContextPath = ""
+        $this.WebFolderPath = ""
         $this.ReducedLocalPath = $this.LocalPath
         $this.Action = ""
         $this.IsResource = ""
@@ -102,6 +105,10 @@ class peregrinaRequestObject {
         $this.Category = $this.Paths[1]
         $this.RequestType = "Category"
 
+        $webFolder = $this.Settings.webFolder
+        write-host "!!!!!!!!!!!!!!!webFolder: $webFolder"
+        $this.WebFolderPath = Resolve-Path -LiteralPath $webFolder
+        write-host "!!!!!!!!!!!!!!!webFolder: $($this.WebFolderPath)"
         $folderSetting = $this.Settings."$($this.Category)Paths"
         if (-not $folderSetting) {
             Write-Host "404 page - category not set"
@@ -126,7 +133,7 @@ class peregrinaRequestObject {
         $this.ContextModelType = "categoryFolder"
 
         if (Test-Path -LiteralPath $this.FolderPath) {
-            $this.FolderPathResolved = Resolve-Path -LiteralPath $this.FolderPath            
+            $this.FolderPathResolved = Resolve-Path -LiteralPath $this.FolderPath
         }
 
         if ($this.FolderPathResolved -eq "") {
@@ -138,9 +145,15 @@ class peregrinaRequestObject {
             return
         }
 
+        # is this used somewhere?
         if ($this.RelativePath[-1] -eq "view") {
             $this.RelativePath = $this.RelativePath[0..($this.RelativePath.Count - 2)]
             $this.Action = "view"
+        }
+        
+        Write-Host $this.UrlVariables
+        if ($this.UrlVariables["action"]) {
+            $this.Action = $this.UrlVariables["action"]
         }
 
         if ($this.Paths.Count -gt $relativeIndex) {
@@ -205,6 +218,13 @@ class peregrinaRequestObject {
     }
 
     RouteRequest() {
+        # action handler
+        if ($this.Action) {
+            Write-Host "ePeregrina action handler"
+            ActionHandler($this)
+            return
+        }
+
         # /
         # /index
         # /home

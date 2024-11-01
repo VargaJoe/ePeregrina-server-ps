@@ -3,22 +3,28 @@ class CbzModelObject {
 
     CbzModelObject($requestObject) {
         $this.model = @{
+            type = "list"
             category = "cbz"
-            items = $this.GetZipContents($requestObject.ContextPath) | ForEach-Object {
-                $relUrlPath = $requestObject.LocalPath + "/" + "$($_.FullName)"
-        
-                # Create a custom object
-                New-Object PSObject -Property @{
-                    Name = $_.FullName 
-                    Url = $relUrlPath
-                }
-            }
+            
+            items = $this.GetZipContents($requestObject.ContextPath) 
         }
     }
 
     [PSCustomObject]GetZipContents([string]$Path) {
-        $zipFile = [System.IO.Compression.ZipFile]::OpenRead("$Path")
-        $result = $zipFile.Entries | Where-Object { $_.FullName -notlike "__MACOSX*" -and $_.FullName -notlike "*/" }
+        write-host "!!!!Request Object: $($Path)"
+        $zipFile = [System.IO.Compression.ZipFile]::OpenRead("$Path")        
+        $result = $zipFile.Entries | Where-Object { $_.FullName -notlike "__MACOSX*" -and $_.FullName -notlike "*/" } | ForEach-Object {
+            $entry = $_
+            $relUrlPath = $requestObject.LocalPath + "/" + "$($entry.FullName)"
+
+            # Create a custom object
+            New-Object PSObject -Property @{
+                Name = $_.FullName 
+                Url  = $relUrlPath
+                Cover = $requestObject.LocalPath + "?action=Cover"
+                Thumbnail = $relUrlPath + "?action=Thumbnail"
+            }
+        }
         $zipFile.Dispose()
         return $result
     }

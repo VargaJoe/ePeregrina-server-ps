@@ -8,11 +8,11 @@ class CategoryIndexModelObject {
                 $FolderPathResolved = Resolve-Path -LiteralPath $_.pathString            
                 Get-ChildItem -LiteralPath $_.pathString | ForEach-Object {
                     $relUrlPath = "/" + $requestObject.Category + "/" + $folderIndex + $_.FullName.Replace($FolderPathResolved, "").Replace("\", "/")
-        
                     # Create a custom object
                     New-Object PSObject -Property @{
                         Name = $_.BaseName
                         Url = $relUrlPath
+                        Cover = $relUrlPath + "?action=Cover"
                     }
                 }
                 $folderIndex = $folderIndex + 1
