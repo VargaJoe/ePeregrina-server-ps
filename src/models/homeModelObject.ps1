@@ -4,6 +4,7 @@ class HomeModelObject {
     HomeModelObject($requestObject) {
         $odd = $true
         $this.model = @{
+            type = "list"
             category = "index"
             items = $requestObject.Settings.PSObject.Properties | Where-Object { $_.Value -is [Object[]] -and $null -ne $_.Value[0].pathString } | ForEach-Object {
                 New-Object PSObject -Property @{

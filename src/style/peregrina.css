@@ -145,6 +145,10 @@ section.pdf object {
   width: 100%;
 }
 
+section.image img {
+  max-width: 100%;
+}
+
 section.html {
   overflow: auto; 
   display: block;

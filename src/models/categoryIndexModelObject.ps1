@@ -20,6 +20,7 @@ class CategoryIndexModelObject {
         } | Sort-Object Name
             
         $this.model = @{
+            type = "list"
             category = $requestObject.Category
             items = $allSharedFolder
         }

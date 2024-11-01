@@ -3,6 +3,7 @@ class TextModelObject {
 
     TextModelObject($requestObject) {
         $this.model = @{
+            type = "file"
             category = "text"
             textFile = $this.GetFileData($requestObject.ContextPath)
         }
