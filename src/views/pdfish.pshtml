@@ -17,7 +17,11 @@
         </header>
         <section class="placeholder"></section>
         <section class="pdf">
-            TRALLALLALLALA
+            <%
+            foreach ($item in $model.items) {
+                "<a href='$($item.Url)' class='rootlink'>$($item.Name)</a>"
+            }
+            %>
         </section>
         <footer><a href="https://github.com/VargaJoe/ePeregrina-server-ps" class="poweredby">powered by ePeregrina</a></footer>
     </body>
