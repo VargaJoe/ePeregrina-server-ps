@@ -23,7 +23,7 @@
   "coverCache": true,
   "thumbnailFolder": "./cache/thumbnails",
   "thumbnailCache": true,  
-  "containerFilter": ["zip", "cbz", "epub"],
+  "containerFilter": ["zip", "cbz", "epub", "pdf"],
   "FileTypes": {
     "jpeg": "image",
     "jpg": "image",

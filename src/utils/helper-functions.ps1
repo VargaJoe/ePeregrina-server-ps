@@ -71,8 +71,12 @@ function PageHandler($requestObject) {
         return
     }
 
-    $pageTemplate = ($this.VirtualModelType) ? $this.VirtualModelType : $this.ContextModelType
-    # Show-View $requestObject $pageTemplate $pageModel.model
+    if ($pageModel.model.pageTemplate) {
+        $pageTemplate = $pageModel.model.pageTemplate
+    } else {
+        $pageTemplate = ($this.VirtualModelType) ? $this.VirtualModelType : $this.ContextModelType
+    }
+    
     $response = [ResponseObject]::new($requestObject.HttpContext.Response)
     Show-View $response $pageTemplate $pageModel.model
 }
