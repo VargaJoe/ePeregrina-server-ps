@@ -55,6 +55,7 @@ class ResponseObject {
                 # $this.HttpResponse.OutputStream.Write($ResponseBuffer, 0, $ResponseBuffer.Length)
                 try {
                     $this.HttpResponse.OutputStream.Write($ResponseBuffer, 0, $ResponseBuffer.Length)
+                    $this.HttpResponse.OutputStream.Close()
                 } catch {
                     # Write-Host "Error writing to OutputStream: $_"
                 }
