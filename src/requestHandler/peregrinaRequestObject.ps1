@@ -167,8 +167,8 @@ class peregrinaRequestObject {
                 if ($match.Success) {
                     $index = $match.Index + $match.Value.Length
                 }
-                $this.RelativePath = $this.RelativePath.Substring(0, $index)
-                $this.VirtualPath = $this.RelativePath.Substring($index)                
+                $this.VirtualPath = $this.RelativePath.Substring($index)
+                $this.RelativePath = $this.RelativePath.Substring(0, $index)                
                 $this.ReducedLocalPath = $this.LocalPath.Substring(0, $this.LocalPath.Length - $this.VirtualPath.Length)
                 
                 # it is a container file
