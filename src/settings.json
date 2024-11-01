@@ -10,7 +10,7 @@
     {
       "pathString" : "./books",
       "userName" : [ "username" ]
-    }    
+    }
   ],
   "users" : [ {
     "name" : "username",
