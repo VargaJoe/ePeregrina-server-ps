@@ -15,7 +15,7 @@ class BinaryHandler {
         Show-Context
 
         $fullPath = $requestObject.ContextPath
-        Write-Output "fullpath: $($fullPath)"
+        Write-Host "fullpath: $($fullPath)"
 
         $this.response.ResponseString = $Null
         $this.response.FilePath = Resolve-Path -LiteralPath $fullPath

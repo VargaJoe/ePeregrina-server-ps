@@ -160,22 +160,22 @@ class peregrinaRequestObject {
             $this.RelativePath = $this.Paths[$relativeIndex..($this.Paths.Count - 1)] -Join "/"
 
             $ufilter = ($this.Settings.containerFilter) -join "|"
-            $efilter = ($this.Settings.containerFilter | ForEach-Object { [regex]::Escape($_) }) -join "|"
+            # $efilter = ($this.Settings.containerFilter | ForEach-Object { [regex]::Escape($_) }) -join "|"
             if ($this.RelativePath -match "\.($ufilter)") {
                 $index = 0
                 $match = [Regex]::Match($this.RelativePath, $ufilter)
                 if ($match.Success) {
                     $index = $match.Index + $match.Value.Length
                 }
-                $this.VirtualPath = $this.RelativePath.Substring($index)
                 $this.RelativePath = $this.RelativePath.Substring(0, $index)
+                $this.VirtualPath = $this.RelativePath.Substring($index)                
                 $this.ReducedLocalPath = $this.LocalPath.Substring(0, $this.LocalPath.Length - $this.VirtualPath.Length)
                 
                 # it is a container file
                 $this.IsContainer = $true
                 $this.IsFile = $true
             } else {
-                Write-Host "NO MATCH!!!" $efilter $this.RelativePath
+                Write-Host "NO MATCH!!!" $ufilter $this.RelativePath
             }
         }
 
