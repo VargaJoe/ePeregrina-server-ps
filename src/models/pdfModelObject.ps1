@@ -24,7 +24,8 @@ class PdfModelObject {
                 # write-host "Cover cache: $($coverCache)"
                 Write-Host "pdfToHtmlCli: $($pdfToHtmlCli)"
             
-                & $pdfToHtmlCli -overwrite -embedbackground -embedfonts -skipinvisible $requestObject.ContextPath $tmpFolder
+                & $pdfToHtmlCli -overwrite -z 2.0 -meta -formfields -embedbackground -embedfonts -skipinvisible $requestObject.ContextPath $tmpFolder
+                # & $pdfToHtmlCli -overwrite -embedbackground -skipinvisible $requestObject.ContextPath $tmpFolder
             }
         }
 
