@@ -24,6 +24,14 @@ class pdfHtmlModelObject {
 
         Write-Host "!?!? Prev Index: $prevIndex - Next Index: $nextIndex"
         Write-Host "!?!? Prev Index: $($htmlObj.ToC[$prevIndex].Url) - Next Index: $($htmlObj.ToC[$nextIndex].Url)"
+
+        # # # Regular expression to find the img tag
+        # $imgPattern = '<img style="position:absolute;.+?src="(.+?)".*?>'
+
+        # # # Replace the img tag with a div that has a background image
+        # $modifiedHtmlContent = $htmlObj.Data -replace $imgPattern, '<div style="background-image: url($1);">' -replace "</body>","</div></body>" -replace "<(/?)(html|body|head)>", "<`$1div>" #-replace "position:absolute;"
+        # Write-Host $modifiedHtmlContent
+
         $this.model = @{
             type = "image"
             pageTemplate = "html"
@@ -33,7 +41,8 @@ class pdfHtmlModelObject {
             }
             htmlFile = @{
                 Name = $selectedPage
-                Data = $htmlObj.Data -replace "<(/?)(html|body|head)>", "<`$1div>" #-replace " style=", " oldstyle="
+                Data = $htmlObj.Data -replace "<(/?)(html|body|head)>", "<`$1div>" #-replace "position:absolute;",""
+                 #-replace " style=", " oldstyle="
             }
         }    
     }

@@ -150,13 +150,19 @@ section.image img {
 }
 
 section.html {
-  overflow: auto; 
-  display: block;
-  width: unset;
+  overflow: auto;
+  /* display: block; */
+  width: 670px;
   max-width: 1000px;
+  /* height: 100vh; */
   margin-left: auto;
   margin-right: auto;
-  font-size: large;
+  /* font-size: large; */
+  display: flex;
+  position: relative;
+  align-content: flex-start;
+  flex-direction: column;
+  justify-content: flex-start;
 }
 
 section>img.thumbnail {

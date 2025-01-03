@@ -209,12 +209,24 @@ class peregrinaRequestObject {
             write-host "!!! $testFilePath not exists !!!"
         }
 
+        # TODO: untangle this mess
         # is there better way to distinguish resource request from content request?        
-        if (($this.HttpRequest.Headers["Referer"] -match "\.html" -and $this.ContextFileType -ne "html" -and $this.VirtualFileType -ne "html") `
-        -or ($this.HttpRequest.Headers["Referer"] -match "\.xhtml" -and $this.ContextFileType -ne "xhtml" -and $this.VirtualFileType -ne "xhtml") `
-        -or ($this.HttpRequest.Headers["Referer"] -match "\.pdf" -and $this.ContextFileType -eq "pdf")) {
+        # if (($this.HttpRequest.Headers["Referer"] -match "\.html" -and $this.ContextFileType -ne "html" -and $this.VirtualFileType -ne "html") `
+        # -or ($this.HttpRequest.Headers["Referer"] -match "\.xhtml" -and $this.ContextFileType -ne "xhtml" -and $this.VirtualFileType -ne "xhtml") `
+        # -or ($this.HttpRequest.Headers["Referer"] -match "\.pdf" -and ($this.ContextFileType -eq "pdf" -or ($this.ContextFileType -ne "pdf" -and $this.VirtualFileType -ne "html")))) {
+        #     $this.IsResource = $true
+        # }
+
+        # workaround for testing pdf extracted html pages but fcuked up the other virtual paths
+        if (
+        ($this.VirtualPath -and $this.VirtualFileType -ne "html")
+            # ($this.HttpRequest.Headers["Referer"] -match "\.html" -and $this.ContextFileType -ne "html" -and $this.VirtualFileType -ne "html") `
+        # -or ($this.HttpRequest.Headers["Referer"] -match "\.xhtml" -and $this.ContextFileType -ne "xhtml" -and $this.VirtualFileType -ne "xhtml") #`
+        # -or ($this.HttpRequest.Headers["Referer"] -match "\.pdf" -and $this.ContextFileType -eq "pdf")        
+        ) {
             $this.IsResource = $true
         }
+        
     }
 
     RouteRequest() {

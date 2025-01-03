@@ -4,6 +4,24 @@
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
         <link rel="stylesheet" type="text/css" href="/style/peregrina.css"></link>
         <title>pelegrin</title>
+        <style>
+            .html {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh; /* Adjust as needed */
+                width: 100%;
+                position: relative;
+            }
+            x .html > div {
+                position: relative;
+                background:white;
+            }
+            .html > div > div > img {
+                /*display: none;*/
+                /*top:50px !important;*/
+            }
+        </style>
     </head>
     <body>
         <header>
