@@ -31,7 +31,7 @@ $Global:responseClosed = $true
 "new listener" | Out-File -Append -FilePath "./log.txt"
 $HttpListener = New-Object System.Net.HttpListener
 $HttpListener.Prefixes.Add("http://+:8888/")
-$HttpListener.Prefixes.Add("https://+:443/")
+# $HttpListener.Prefixes.Add("https://+:443/")
 $HttpListener.Start()
 
 try {
